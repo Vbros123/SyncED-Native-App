@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SyncED</string>
+    <string name="title_activity_main">SyncED</string>
+    <string name="package_name">com.synced.learning</string>
+    <string name="custom_url_scheme">com.synced.learning</string>
+</resources>
