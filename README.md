@@ -92,6 +92,17 @@ npm run native:sync
 
 All people, schools, locations, leaderboard entries, support programs, and account data are fictional sample data. Progress stays on the current device. Cross-device accounts and real school syncing are not included because this build intentionally has no backend.
 
+
+## Publish to a private GitHub repository
+
+After installing and signing in to the GitHub CLI, run:
+
+```bash
+./scripts/publish-private.sh
+```
+
+The script creates or updates `Vbros123/SyncED-Native-App`, pushes `main`, and verifies that the repository visibility is private.
+
 ## Production build and QA
 
 ```bash
