@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
-    "@capacitor/cli": "^8.4.2",
+    "@capacitor/cli": "^8.5.0",
     "@eslint/js": "^10.0.1",
     "@sparticuz/chromium": "^149.0.0",
     "eslint": "^10.7.0",
