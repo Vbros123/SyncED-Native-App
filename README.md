@@ -101,6 +101,7 @@ After installing and signing in to the GitHub CLI, run:
 ./scripts/publish-private.sh
 ```
 Vercel Link:https://sync-ed-native-app.vercel.app/
+
 The script creates or updates `Vbros123/SyncED-Native-App`, pushes `main`, and verifies that the repository visibility is private.
 
 ## Production build and QA
