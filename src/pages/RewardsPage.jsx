@@ -86,7 +86,7 @@ export default function RewardsPage({ state, online, onCustomize, onUpdateSettin
             <span className="nova-foot nova-foot-left" />
             <span className="nova-foot nova-foot-right" />
             {mascot.headwear === 'cap' ? <GraduationCap className="nova-item nova-cap" /> : null}
-            {mascot.headwear === 'headphones' ? <span className="nova-item nova-headphones" aria-hidden="true" /> : null}
+            {mascot.headwear === 'headphones' ? <Headphones className="nova-item nova-headphones" /> : null}
             {mascot.accessory === 'medal' ? <Medal className="nova-item nova-medal" /> : null}
           </div>
         </div>

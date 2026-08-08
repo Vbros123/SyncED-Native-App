@@ -21,8 +21,10 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button, Progress } from '../components/UI.jsx'
+import OfflineTestPanel from '../components/OfflineTestPanel.jsx'
 import { languages } from '../data.js'
 import { useI18n } from '../i18n.jsx'
+import { formatBytes } from '../services/contentStorage.js'
 
 function Toggle({ checked, onChange, label }) {
   return <button role="switch" aria-checked={checked} aria-label={label} className={`toggle ${checked ? 'on' : ''}`} onClick={() => onChange(!checked)}><span /></button>
@@ -38,7 +40,7 @@ const sections = [
   ['about', 'About SyncED', Info],
 ]
 
-export default function SettingsPage({ state, updateSetting, onClearDownloads, onSync, onNavigate, onShowToast }) {
+export default function SettingsPage({ state, updateSetting, onClearDownloads, onSync, onNavigate, onShowToast, connectivity, syncQueue, downloads, storageInfo, onAddTestFailure, onClearActivity }) {
   const { t, language, setLanguage } = useI18n()
   const [active, setActive] = useState('language')
 
@@ -64,13 +66,13 @@ export default function SettingsPage({ state, updateSetting, onClearDownloads, o
             <div className="accent-setting"><div><strong>{t('Accent color')}</strong><p>{t('Changes buttons, links, and progress highlights.')}</p></div><div>{[['blue', '#0757e6'], ['teal', '#087f75'], ['purple', '#7256d9'], ['orange', '#c75d09']].map(([id, color]) => <button key={id} className={state.settings.accent === id ? 'active' : ''} onClick={() => updateSetting('accent', id)} aria-label={t('{color} accent', { color: id })} style={{ '--swatch': color }}>{state.settings.accent === id ? <Check size={15} /> : null}</button>)}</div></div>
           </section> : null}
 
-          {active === 'offline' ? <section className="panel settings-section">
+          {active === 'offline' ? <><section className="panel settings-section">
             <div className="settings-section-heading"><div><h2>{t('Offline & storage')}</h2><p>{t('Choose what SyncED keeps ready on this device.')}</p></div><HardDrive size={22} /></div>
-            <div className="storage-overview"><div><span><Database size={21} /></span><p><strong>{t('{amount} GB used', { amount: state.storageUsed.toFixed(1) })}</strong><small>{t('{amount} GB available', { amount: (16 - state.storageUsed).toFixed(1) })}</small></p></div><Progress value={(state.storageUsed / 16) * 100} /></div>
+            <div className="storage-overview"><div><span><Database size={21} /></span><p><strong>{storageInfo.supported ? `${formatBytes(storageInfo.usage)} used` : 'Storage estimate unavailable'}</strong><small>{storageInfo.quota ? `${formatBytes(Math.max(0, storageInfo.quota - storageInfo.usage))} estimated available` : 'Available space not reported'}</small></p></div>{storageInfo.quota ? <Progress value={(storageInfo.usage / storageInfo.quota) * 100} /> : null}</div>
             <div className="setting-row"><span className="setting-icon"><Download size={19} /></span><div><strong>{t('Automatically download new lessons')}</strong><p>{t('Download over trusted Wi-Fi at a community hub.')}</p></div><Toggle label={t('Automatically download lessons')} checked={state.settings.autoDownload} onChange={(value) => updateSetting('autoDownload', value)} /></div>
             <div className="setting-row"><span className="setting-icon"><Wifi size={19} /></span><div><strong>{t('Sync only on Wi-Fi')}</strong><p>{t('Protects limited mobile data plans.')}</p></div><Toggle label={t('Sync only on Wi-Fi')} checked={state.settings.wifiOnly} onChange={(value) => updateSetting('wifiOnly', value)} /></div>
             <div className="settings-actions"><Button variant="secondary" icon={RefreshCw} onClick={onSync}>{t('Check for updates')}</Button><Button variant="danger" icon={Trash2} onClick={onClearDownloads}>{t('Remove downloaded lessons')}</Button></div>
-          </section> : null}
+          </section><OfflineTestPanel demoMode={connectivity.demoMode} onSetDemoMode={connectivity.setDemoMode} queueEntries={syncQueue.entries} onAddFailure={onAddTestFailure} onRetry={() => syncQueue.sync({ ignoreBackoff: true })} onClearDownloads={downloads.clear} onClearActivity={onClearActivity} /></> : null}
 
           {active === 'notifications' ? <section className="panel settings-section"><div className="settings-section-heading"><div><h2>{t('Notifications')}</h2><p>{t('Choose which reminders appear on this device.')}</p></div><Bell size={22} /></div><div className="setting-row"><span className="setting-icon"><Bell size={19} /></span><div><strong>{t('Assignment reminders')}</strong><p>{t('Show a reminder before an assignment is due or closes.')}</p></div><Toggle label={t('Assignment reminders')} checked={state.settings.assignmentReminders} onChange={(value) => updateSetting('assignmentReminders', value)} /></div><div className="setting-row"><span className="setting-icon"><RefreshCw size={19} /></span><div><strong>{t('Sync reminders')}</strong><p>{t('Remind me when completed work has not synced.')}</p></div><Toggle label={t('Sync reminders')} checked={state.settings.syncReminders} onChange={(value) => updateSetting('syncReminders', value)} /></div></section> : null}
 

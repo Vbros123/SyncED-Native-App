@@ -22,7 +22,9 @@ import { assignmentDates, assignmentStatus } from '../utils/dates.js'
 export default function HomePage({
   online,
   syncing,
+  syncState,
   state,
+  downloads,
   onSync,
   onViewQueue,
   onOpenCourse,
@@ -51,6 +53,7 @@ export default function HomePage({
       <SyncPanel
         online={online}
         syncing={syncing}
+        syncState={syncState}
         pendingUploads={state.queueItems.length}
         lastSync={state.lastSync}
         downloaded={state.downloaded}
@@ -66,7 +69,7 @@ export default function HomePage({
             <TextButton onClick={() => onNavigate('learning')}>{t('View all')}</TextButton>
           </div>
           <div className="course-list">
-            {courses.slice(0, 2).map((course) => <CourseRow key={course.id} course={course} onOpen={onOpenCourse} compact plainLanguage={state.settings.plainLanguage} />)}
+            {courses.slice(0, 2).map((course) => <CourseRow key={course.id} course={course} onOpen={onOpenCourse} compact plainLanguage={state.settings.plainLanguage} isDownloaded={Boolean(downloads.recordMap[course.id])} completedCount={state.courseProgress[course.id]?.length || 0} />)}
           </div>
         </section>
 

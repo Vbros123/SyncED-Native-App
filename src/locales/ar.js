@@ -1,4 +1,5 @@
 export default {
+  'Not downloaded': 'غير مُنزّل',
   'Good morning, Maya': 'صباح الخير يا مايا',
   'Your lessons are ready. Pick one thing to do next.': 'دروسك جاهزة. اختاري مهمة واحدة للبدء.',
   '4-day learning streak': 'سلسلة تعلّم لمدة 4 أيام',
@@ -685,21 +686,5 @@ export default {
   'Focused': 'مركّز',
   'Free': 'مجاني',
   'Choose {item}': 'اختر {item}',
-  'Nova’s new look is saved on this device.': 'تم حفظ مظهر نوفا الجديد على هذا الجهاز.',
-  'Complete lesson': 'إكمال الدرس',
-  'Lesson complete! +10 learning points. Progress is queued to sync.': 'اكتمل الدرس! +10 نقاط تعلّم. التقدم في قائمة انتظار المزامنة.',
-  'Offline teacher check': 'تحقق المعلم دون اتصال',
-  'Teacher check': 'تحقق المعلم',
-  'Ready for teacher check': 'جاهز لتحقق المعلم',
-  'Show this code to your teacher so they can confirm this lesson.': 'اعرض هذا الرمز على معلمك لتأكيد إكمال الدرس.',
-  'Student': 'الطالب',
-  'Lesson': 'الدرس',
-  'Course': 'المقرر',
-  'Points earned': 'النقاط المكتسبة',
-  'Verification code': 'رمز التحقق',
-  'Teacher verification QR code': 'رمز QR للتحقق من المعلم',
-  'QR code unavailable': 'رمز QR غير متاح',
-  'Preparing QR code…': 'جارٍ إعداد رمز QR…',
-  'This check works offline. A teacher can scan the code or compare the code and lesson details on screen.': 'يعمل هذا التحقق دون اتصال. يمكن للمعلم مسح الرمز أو مقارنة الرمز وتفاصيل الدرس على الشاشة.',
-  'Close teacher check': 'إغلاق تحقق المعلم'
+  'Nova’s new look is saved on this device.': 'تم حفظ مظهر نوفا الجديد على هذا الجهاز.'
 }

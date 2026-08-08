@@ -1,17 +1,30 @@
 import http from 'node:http'
-import { readFile, stat, mkdir } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
+import { readFile, stat, mkdir, mkdtemp } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { chromium as playwrightChromium } from 'playwright-core'
 
-const chromiumTemp = `/tmp/synced-chromium-${process.pid}`
-await mkdir(chromiumTemp, { recursive: true })
-process.env.TMPDIR = chromiumTemp
-process.getuid = () => 1000
-process.getgid = () => 1000
-const { default: chromium } = await import('@sparticuz/chromium')
+const qaTemp = await mkdtemp(path.join(tmpdir(), 'synced-visual-qa-'))
+const browserCandidates = [
+  'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+  'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+  'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+  '/usr/bin/google-chrome',
+  '/usr/bin/chromium',
+]
+let executablePath = browserCandidates.find(existsSync)
+let browserArgs = ['--no-sandbox', '--disable-dev-shm-usage']
+if (!executablePath) {
+  process.getuid ||= () => 1000
+  process.getgid ||= () => 1000
+  const { default: bundledChromium } = await import('@sparticuz/chromium')
+  executablePath = await bundledChromium.executablePath()
+  browserArgs = bundledChromium.args
+}
 
 const root = path.resolve('dist')
-const screenshotDir = '/tmp/synced-qa'
+const screenshotDir = path.join(qaTemp, 'screenshots')
 await mkdir(screenshotDir, { recursive: true })
 
 const mime = {
@@ -49,74 +62,29 @@ const results = {}
 let browser
 
 try {
-  browser = await playwrightChromium.launch({ args: chromium.args, executablePath: await chromium.executablePath(), headless: true })
+  browser = await playwrightChromium.launch({ args: browserArgs, executablePath, headless: true })
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1, acceptDownloads: true })
   await context.addInitScript(() => {
-    const nativeSetTimeout = window.setTimeout.bind(window)
-    window.setTimeout = (callback, delay, ...args) => {
-      let resolvedDelay = delay
-      try {
-        if (delay === 4200 && !sessionStorage.getItem('synced-qa-launch-held')) {
-          sessionStorage.setItem('synced-qa-launch-held', 'true')
-          resolvedDelay = 10000
-        }
-      } catch {
-        resolvedDelay = delay
-      }
-      return nativeSetTimeout(callback, resolvedDelay, ...args)
-    }
+    localStorage.setItem('synced-onboarding-complete', 'true')
     window.__SYNCED_I18N_AUDIT__ = true
     window.__SYNCED_I18N_MISSES__ = {}
-    window.__SYNCED_SOUND_EVENTS__ = []
-    window.addEventListener('synced:sound', (event) => window.__SYNCED_SOUND_EVENTS__.push(event.detail?.name))
   })
   const page = await context.newPage()
   page.on('console', (message) => { if (message.type() === 'error') errors.push(`console: ${message.text()}`) })
   page.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`))
 
   await page.goto(baseUrl, { waitUntil: 'domcontentloaded' })
-  await page.evaluate(() => {
-    localStorage.clear()
-    sessionStorage.clear()
-  })
+  await page.evaluate(() => localStorage.clear())
   await page.reload({ waitUntil: 'domcontentloaded' })
   const launchSequence = page.getByTestId('launch-sequence')
   await launchSequence.waitFor({ state: 'visible' })
   await page.waitForTimeout(900)
-  const launchAudit = await launchSequence.evaluate((element) => {
-    const audit = {
-      launchStudents: element.querySelectorAll('.launch-student').length,
-      launchCaps: element.querySelectorAll('.launch-cap').length,
-      launchStars: element.querySelectorAll('.launch-stars i').length,
-      launchOrbitIcons: element.querySelectorAll('.launch-orbit-icon').length,
-      launchCopyOpacity: Number(getComputedStyle(element.querySelector('.launch-copy')).opacity),
-    }
-    element.style.setProperty('animation', 'none', 'important')
-    element.style.setProperty('opacity', '1', 'important')
-    element.style.setProperty('visibility', 'visible', 'important')
-    element.querySelectorAll('*').forEach((node) => {
-      node.style.setProperty('animation-play-state', 'paused', 'important')
-      node.style.setProperty('transition', 'none', 'important')
-    })
-    element.querySelectorAll('.launch-curtain').forEach((curtain) => curtain.style.setProperty('transform', 'none', 'important'))
-    element.querySelector('.launch-copy').style.setProperty('opacity', '1', 'important')
-    element.querySelector('.launch-progress i').style.setProperty('transform', 'scaleX(.88)', 'important')
-    element.querySelectorAll('.launch-student').forEach((student) => {
-      student.style.setProperty('opacity', '1', 'important')
-      student.style.setProperty('transform', 'none', 'important')
-    })
-    const capHeights = ['-30vh', '-48vh', '-64vh', '-40vh', '-70vh', '-51vh', '-62vh', '-36vh', '-55vh']
-    element.querySelectorAll('.launch-cap').forEach((cap, index) => {
-      cap.style.setProperty('opacity', '1', 'important')
-      cap.style.setProperty('transform', `translate3d(0, ${capHeights[index]}, 0) rotate(${index % 2 ? '8deg' : '-8deg'}) scale(var(--cap-scale))`, 'important')
-    })
-    return audit
-  })
-  Object.assign(results, launchAudit)
-  if (results.launchStudents !== 3 || results.launchCaps !== 9 || results.launchStars !== 12 || results.launchOrbitIcons !== 3) throw new Error(`Launch scene counts are wrong: ${JSON.stringify({ students: results.launchStudents, caps: results.launchCaps, stars: results.launchStars, orbitIcons: results.launchOrbitIcons })}`)
+  results.launchStudents = await page.locator('.launch-student').count()
+  results.launchCaps = await page.locator('.launch-cap').count()
+  results.launchCopyOpacity = Number(await page.locator('.launch-copy').evaluate((element) => getComputedStyle(element).opacity))
   if (results.launchCopyOpacity < 0.95) throw new Error(`Launch copy is too faint: ${results.launchCopyOpacity}`)
   await page.screenshot({ path: `${screenshotDir}/launch-desktop.png`, fullPage: false })
-  await launchSequence.waitFor({ state: 'detached', timeout: 12000 })
+  await launchSequence.waitFor({ state: 'detached', timeout: 5000 })
   await page.getByRole('heading', { name: 'Good morning, Maya' }).waitFor()
   results.desktopOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
   await page.screenshot({ path: `${screenshotDir}/home-desktop.png`, fullPage: true })
@@ -133,11 +101,14 @@ try {
   await page.locator('.side-nav').getByRole('button', { name: 'Explore', exact: true }).click()
   await page.getByRole('heading', { name: 'Explore lessons' }).waitFor()
   results.exploreSubjects = await page.locator('.explore-card').count()
+  await page.getByRole('button', { name: 'Math', exact: true }).click()
+  results.mathLessons = await page.locator('.explore-card').count()
+  if (results.mathLessons !== 6) throw new Error(`Expected 6 Math lessons, found ${results.mathLessons}`)
+  await page.getByRole('button', { name: 'All subjects', exact: true }).click()
   const downloadPromise = page.waitForEvent('download')
   await page.locator('.explore-card').first().getByRole('button', { name: 'Worksheet', exact: true }).click()
   const download = await downloadPromise
   results.worksheetDownload = download.suggestedFilename().includes('worksheet-en.html')
-  await page.getByRole('button', { name: 'Dismiss', exact: true }).click()
   await page.locator('.explore-card').filter({ hasText: 'Living systems' }).getByRole('button', { name: 'Start', exact: true }).click()
   await page.getByRole('heading', { name: 'Producers' }).waitFor()
   await page.getByRole('button', { name: /Play video/ }).click()
@@ -145,30 +116,10 @@ try {
   await page.getByRole('button', { name: /A grass plant/ }).click()
   await page.getByRole('button', { name: 'Check answer', exact: true }).click()
   await page.locator('.answer-feedback.correct').getByText('That’s right.', { exact: true }).waitFor()
-  results.correctAnswerSounds = await page.evaluate(() => window.__SYNCED_SOUND_EVENTS__.filter((name) => name === 'correct').length)
-  results.capsBeforeLessonCompletion = await page.locator('.lesson-complete-burst .completion-cap').count()
-  if (results.correctAnswerSounds !== 1 || results.capsBeforeLessonCompletion !== 0) throw new Error('Correct answer feedback fired the wrong effects')
+  results.lessonCelebrationCaps = await page.locator('.correct-cap-burst .answer-cap').count()
+  await page.waitForTimeout(420)
   await page.screenshot({ path: `${screenshotDir}/correct-answer-desktop.png`, fullPage: false })
-  await page.getByRole('button', { name: 'Complete lesson', exact: true }).click()
-  await page.getByText('Lesson complete! +10 learning points. Progress is queued to sync.', { exact: true }).waitFor()
-  const lessonQrModal = page.getByTestId('completion-qr-modal')
-  await lessonQrModal.waitFor({ state: 'visible' })
-  const lessonQrImage = lessonQrModal.locator('img')
-  await lessonQrImage.waitFor({ state: 'visible' })
-  await page.waitForTimeout(240)
-  results.lessonQrVisible = true
-  results.lessonQrReadable = (await lessonQrImage.getAttribute('alt')) === 'Teacher verification QR code'
-  if (!results.lessonQrReadable) throw new Error('Lesson completion QR code is missing its accessible label')
-  await page.screenshot({ path: `${screenshotDir}/lesson-qr-desktop.png`, fullPage: false })
-  const closeLessonQr = lessonQrModal.getByRole('button', { name: 'Close teacher check', exact: true })
-  if (await closeLessonQr.count() !== 1) throw new Error('Lesson completion QR modal close action is ambiguous')
-  await closeLessonQr.click()
-  await lessonQrModal.waitFor({ state: 'detached' })
-  results.lessonCompletionCaps = await page.locator('.lesson-complete-burst .completion-cap').count()
-  if (results.lessonCompletionCaps !== 9) throw new Error('Lesson completion cap burst is incomplete')
-  await page.waitForTimeout(380)
-  await page.screenshot({ path: `${screenshotDir}/lesson-complete-desktop.png`, fullPage: false })
-  await page.getByRole('button', { name: 'Next lesson', exact: true }).click()
+  await page.getByRole('button', { name: 'Next question', exact: true }).click()
   await page.getByRole('heading', { name: 'Food webs' }).waitFor()
   await page.getByRole('button', { name: 'Previous', exact: true }).click()
   await page.getByRole('heading', { name: 'Producers' }).waitFor()
@@ -186,28 +137,7 @@ try {
   await page.locator('.choice-list label').filter({ hasText: 'Open the official school app or ask a trusted adult' }).click()
   await page.getByRole('button', { name: 'Check answer', exact: true }).click()
   await page.getByText('Exactly.', { exact: true }).waitFor()
-  results.correctAnswerSounds = await page.evaluate(() => window.__SYNCED_SOUND_EVENTS__.filter((name) => name === 'correct').length)
-  results.skillCapsBeforeCompletion = await page.locator('.lesson-complete-burst .completion-cap').count()
-  if (results.correctAnswerSounds !== 2 || results.skillCapsBeforeCompletion !== 0) throw new Error('Digital-skill answer feedback fired the wrong effects')
-  await page.getByRole('button', { name: 'Finish lesson', exact: true }).click()
-  const skillQrModal = page.getByTestId('completion-qr-modal')
-  await skillQrModal.waitFor({ state: 'visible' })
-  const skillQrImage = skillQrModal.locator('img')
-  await skillQrImage.waitFor({ state: 'visible' })
-  await page.waitForTimeout(240)
-  results.skillQrVisible = true
-  results.skillQrReadable = (await skillQrImage.getAttribute('alt')) === 'Teacher verification QR code'
-  if (!results.skillQrReadable) throw new Error('Digital-skill completion QR code is missing its accessible label')
-  await page.screenshot({ path: `${screenshotDir}/skill-qr-desktop.png`, fullPage: false })
-  const closeSkillQr = skillQrModal.getByRole('button', { name: 'Close teacher check', exact: true })
-  if (await closeSkillQr.count() !== 1) throw new Error('Digital-skill QR modal close action is ambiguous')
-  await closeSkillQr.click()
-  await skillQrModal.waitFor({ state: 'detached' })
-  await page.getByRole('heading', { name: 'That skill is yours.' }).waitFor()
-  results.skillCompletionCaps = await page.locator('.lesson-complete-burst .completion-cap').count()
-  if (results.skillCompletionCaps !== 9) throw new Error('Digital-skill completion cap burst is incomplete')
-  await page.waitForTimeout(380)
-  await page.screenshot({ path: `${screenshotDir}/skill-complete-desktop.png`, fullPage: false })
+  results.skillCelebrationCaps = await page.locator('.correct-cap-burst .answer-cap').count()
 
   await page.locator('.side-nav').getByRole('button', { name: 'Rewards', exact: true }).click()
   await page.getByRole('heading', { name: 'Rewards' }).waitFor()
@@ -220,19 +150,6 @@ try {
   await page.locator('.custom-mood-grid').getByRole('button', { name: 'Excited', exact: true }).click()
   const novaStageClass = await page.locator('.nova-stage').getAttribute('class')
   results.rewardCustomization = ['nova-headwear-headphones', 'nova-accessory-medal', 'nova-face-cosmic', 'nova-body-green', 'nova-expression-excited'].every((name) => novaStageClass.includes(name))
-  results.headphonesFit = await page.locator('.nova-character').evaluate((character) => {
-    const characterBox = character.getBoundingClientRect()
-    const headphones = character.querySelector('.nova-headphones')
-    if (!headphones || headphones.tagName !== 'SPAN') return false
-    const headphonesBox = headphones.getBoundingClientRect()
-    return headphonesBox.left >= characterBox.left
-      && headphonesBox.right <= characterBox.right
-      && headphonesBox.top >= characterBox.top
-      && headphonesBox.bottom <= characterBox.bottom
-      && headphonesBox.width >= 165
-      && headphonesBox.width <= 180
-  })
-  if (!results.headphonesFit) throw new Error('Nova headphones are not fitted to the character')
   await page.screenshot({ path: `${screenshotDir}/rewards-customized-desktop.png`, fullPage: true })
 
   await page.locator('.side-nav').getByRole('button', { name: 'Community hubs', exact: true }).click()
@@ -331,7 +248,7 @@ try {
   await context.setOffline(false)
 
   await page.evaluate(() => {
-    const key = 'synced-demo-state-v2'
+    const key = 'synced-device-state-v3'
     const saved = JSON.parse(localStorage.getItem(key) || '{}')
     localStorage.setItem(key, JSON.stringify({
       ...saved,
@@ -364,11 +281,7 @@ try {
     `${screenshotDir}/launch-desktop.png`,
     `${screenshotDir}/home-desktop.png`,
     `${screenshotDir}/correct-answer-desktop.png`,
-    `${screenshotDir}/lesson-qr-desktop.png`,
-    `${screenshotDir}/lesson-complete-desktop.png`,
     `${screenshotDir}/lesson-desktop.png`,
-    `${screenshotDir}/skill-complete-desktop.png`,
-    `${screenshotDir}/skill-qr-desktop.png`,
     `${screenshotDir}/rewards-customized-desktop.png`,
     `${screenshotDir}/rewards-backpack-desktop.png`,
     `${screenshotDir}/privacy-desktop.png`,

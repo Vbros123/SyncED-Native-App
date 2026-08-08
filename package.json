@@ -12,10 +12,12 @@
     "native:ios": "npm run native:sync && open -a Xcode ios/App/App.xcodeproj",
     "native:android:apk": "npm run native:sync && cd android && ./gradlew assembleDebug",
     "native:doctor": "cap doctor",
-    "qa": "npm run qa:i18n && node scripts/qa.mjs",
+    "test": "npm run build && node scripts/offline-qa.mjs",
+    "qa": "npm run qa:i18n && npm run test && npm run qa:visual",
+    "qa:visual": "node scripts/qa.mjs",
     "qa:i18n": "node scripts/i18n-data-audit.mjs",
     "lint": "eslint .",
-    "check": "npm run lint && npm run build && npm run qa"
+    "check": "npm run lint && npm run qa"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.2",

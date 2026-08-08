@@ -1,4 +1,5 @@
 export default {
+  'Not downloaded': 'डाउनलोड नहीं किया गया',
   'Good morning, Maya': 'सुप्रभात, माया',
   'Your lessons are ready. Pick one thing to do next.': 'आपके पाठ तैयार हैं। अब एक काम चुनें।',
   '4-day learning streak': '4 दिन की सीखने की स्ट्रीक',
@@ -685,21 +686,5 @@ export default {
   'Focused': 'ध्यान में',
   'Free': 'मुफ़्त',
   'Choose {item}': '{item} चुनें',
-  'Nova’s new look is saved on this device.': 'Nova का नया रूप इस डिवाइस पर सहेजा गया है।',
-  'Complete lesson': 'पाठ पूरा करें',
-  'Lesson complete! +10 learning points. Progress is queued to sync.': 'पाठ पूरा हुआ! +10 लर्निंग पॉइंट्स। प्रगति सिंक के लिए कतार में है।',
-  'Offline teacher check': 'ऑफ़लाइन शिक्षक जाँच',
-  'Teacher check': 'शिक्षक जाँच',
-  'Ready for teacher check': 'शिक्षक जाँच के लिए तैयार',
-  'Show this code to your teacher so they can confirm this lesson.': 'यह पाठ पूरा होने की पुष्टि के लिए कोड अपने शिक्षक को दिखाएँ।',
-  'Student': 'विद्यार्थी',
-  'Lesson': 'पाठ',
-  'Course': 'कोर्स',
-  'Points earned': 'अर्जित अंक',
-  'Verification code': 'सत्यापन कोड',
-  'Teacher verification QR code': 'शिक्षक सत्यापन QR कोड',
-  'QR code unavailable': 'QR कोड उपलब्ध नहीं है',
-  'Preparing QR code…': 'QR कोड तैयार हो रहा है…',
-  'This check works offline. A teacher can scan the code or compare the code and lesson details on screen.': 'यह जाँच ऑफ़लाइन काम करती है। शिक्षक कोड स्कैन कर सकते हैं या स्क्रीन पर कोड और पाठ का विवरण मिला सकते हैं।',
-  'Close teacher check': 'शिक्षक जाँच बंद करें'
+  'Nova’s new look is saved on this device.': 'Nova का नया रूप इस डिवाइस पर सहेजा गया है।'
 }

@@ -15,13 +15,13 @@ import {
   Menu,
   Settings,
   Users,
-  Wifi,
-  WifiOff,
   X,
 } from 'lucide-react'
 import { useState } from 'react'
 import { languages } from '../data.js'
 import { useI18n } from '../i18n.jsx'
+import { formatBytes } from '../services/contentStorage.js'
+import ConnectionStatus from './ConnectionStatus.jsx'
 import Logo from './Logo.jsx'
 import { Progress } from './UI.jsx'
 
@@ -41,15 +41,17 @@ export default function AppShell({
   active,
   onNavigate,
   children,
-  online,
-  setOnline,
-  storageUsed,
+  connectivity,
+  syncState,
+  pendingCount,
+  storageInfo,
   plainLanguage,
 }) {
   const { language, setLanguage, t } = useI18n()
   const [menuOpen, setMenuOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem('synced-sidebar-collapsed') === 'true')
   const currentNav = active === 'lesson' ? 'learning' : active
+  const storagePercent = storageInfo.quota ? (storageInfo.usage / storageInfo.quota) * 100 : 0
 
   const navigate = (id) => {
     onNavigate(id)
@@ -92,17 +94,11 @@ export default function AppShell({
             <Database size={20} />
             <div className="side-card-copy">
               <strong>{t('Storage')}</strong>
-              <span>{storageUsed.toFixed(1)} GB / 16 GB</span>
-              <Progress value={(storageUsed / 16) * 100} compact />
+              <span>{storageInfo.supported ? `${formatBytes(storageInfo.usage)} used` : t('Estimate unavailable')}</span>
+              <Progress value={storagePercent} compact />
             </div>
           </div>
-          <button className={`side-card connection-card ${online ? 'is-online' : ''}`} onClick={() => setOnline(!online)}>
-            <span className="side-status-icon">{online ? <Wifi size={19} /> : <CheckCircle2 size={19} />}</span>
-            <span>
-              <strong>{online ? t('You’re online') : t('You’re offline')}</strong>
-              <small>{online ? t('Ready to sync') : t('All set to learn')}</small>
-            </span>
-          </button>
+          <ConnectionStatus isOnline={connectivity.isOnline} browserOnline={connectivity.browserOnline} demoMode={connectivity.demoMode} syncState={syncState} pendingCount={pendingCount} />
           <button className="collapse-control" onClick={toggleCollapsed} aria-label={t(collapsed ? 'Expand sidebar' : 'Collapse sidebar')} title={t(collapsed ? 'Expand sidebar' : 'Collapse sidebar')}>
             {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
             <span>{t('Collapse sidebar')}</span>
@@ -116,11 +112,7 @@ export default function AppShell({
         <header className="topbar">
           <button className="mobile-menu" aria-label={t('Open menu')} onClick={() => setMenuOpen(true)}><Menu size={23} /></button>
           {plainLanguage ? <button className="plain-mode-chip" onClick={() => navigate('settings')}><CheckCircle2 size={15} />{t('Plain language is on')}</button> : null}
-          <button className={`connection-control ${online ? 'online' : 'offline'}`} onClick={() => setOnline(!online)}>
-            <span className="connection-symbol">{online ? <Wifi size={17} /> : <WifiOff size={17} />}</span>
-            <span>{online ? t('Connected') : t('Offline ready')}</span>
-            <ChevronDown size={16} />
-          </button>
+          <ConnectionStatus compact isOnline={connectivity.isOnline} browserOnline={connectivity.browserOnline} demoMode={connectivity.demoMode} syncState={syncState} pendingCount={pendingCount} />
           <label className="language-control">
             <Globe2 size={17} />
             <select value={language} onChange={(event) => setLanguage(event.target.value)} aria-label={t('Language')}>

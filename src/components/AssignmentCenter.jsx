@@ -74,16 +74,17 @@ export function CalendarModal({ completedAssignments, onClose, onOpenAssignment 
   )
 }
 
-export function SyncQueueModal({ queueItems, online, onSync, onClose }) {
+export function SyncQueueModal({ queueItems, online, syncState, onSync, onClose }) {
   const { t } = useI18n()
   return (
-    <Modal title={t('Sync queue')} eyebrow={online ? t('Connected') : t('Saved on this device')} onClose={onClose}>
+    <Modal title={t('Sync queue')} eyebrow={online ? 'Prototype sync server' : t('Saved on this device')} onClose={onClose}>
       <div className="sync-queue-list">
         {queueItems.length ? queueItems.map((item) => (
-          <div className="sync-queue-row" key={item.id}><span><Upload size={18} /></span><div><strong>{t(item.label)}</strong><small>{t(item.type)}</small></div><em>{t('Waiting')}</em></div>
+          <div className={`sync-queue-row queue-${item.status}`} key={item.id}><span><Upload size={18} /></span><div><strong>{t(item.label)}</strong><small>{t(item.type)}</small>{item.lastError ? <small className="queue-error">{item.lastError}</small> : null}</div><em>{item.status === 'syncing' ? 'Syncing' : item.status === 'failed' ? 'Failed · retry saved' : 'Waiting to sync'}</em></div>
         )) : <div className="queue-empty"><Check size={24} /><strong>{t('Everything is synced')}</strong><p>{t('There is no work waiting to upload.')}</p></div>}
       </div>
-      <div className="form-actions"><Button variant="quiet" onClick={onClose}>{t('Close')}</Button><Button icon={Upload} onClick={onSync} disabled={!online || !queueItems.length}>{online ? t('Sync now') : t('Connect to sync')}</Button></div>
+      <p className="prototype-disclosure">Prototype sync server: submissions are simulated locally until a production backend is connected.</p>
+      <div className="form-actions"><Button variant="quiet" onClick={onClose}>{t('Close')}</Button><Button icon={Upload} onClick={onSync} disabled={!online || !queueItems.length || syncState === 'syncing'}>{!online ? t('Connect to sync') : syncState === 'syncing' ? 'Syncing…' : t('Sync now')}</Button></div>
     </Modal>
   )
 }

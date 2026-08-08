@@ -1,12 +1,13 @@
-import { CheckCircle2, Download, FileText, ListChecks, Search } from 'lucide-react'
+import { CheckCircle2, ListChecks, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import CourseRow from '../components/CourseRow.jsx'
-import { Button, EmptyState, Progress } from '../components/UI.jsx'
+import DownloadManager from '../components/DownloadManager.jsx'
+import { EmptyState, Progress } from '../components/UI.jsx'
 import { courses } from '../data.js'
 import { useI18n } from '../i18n.jsx'
 import { assignmentDates, assignmentStatus } from '../utils/dates.js'
 
-export default function LearningPage({ state, onOpenCourse, onOpenAssignment, onDownloadAll, onDownloadWorksheet, initialTab = 'courses' }) {
+export default function LearningPage({ state, downloads, storageInfo, onOpenCourse, onOpenAssignment, onDownloadPack, initialTab = 'courses' }) {
   const { t, formatDate } = useI18n()
   const [tab, setTab] = useState(initialTab)
   const [query, setQuery] = useState('')
@@ -14,9 +15,9 @@ export default function LearningPage({ state, onOpenCourse, onOpenAssignment, on
     () => courses.filter((course) => `${t(course.subject)} ${t(course.title)}`.toLowerCase().includes(query.toLowerCase())),
     [query, t],
   )
-  const completedLessons = Object.values(state.courseProgress).reduce((sum, ids) => sum + ids.length, 0)
-  const totalLessons = courses.reduce((sum, course) => sum + course.lessonsTotal, 0)
-  const overall = Math.round((completedLessons / totalLessons) * 100)
+  const completedQuestions = Object.values(state.courseProgress).reduce((sum, ids) => sum + ids.length, 0)
+  const totalQuestions = courses.reduce((sum, course) => sum + course.questionsTotal, 0)
+  const overall = Math.round((completedQuestions / totalQuestions) * 100)
 
   return (
     <div className="page-stack">
@@ -36,8 +37,8 @@ export default function LearningPage({ state, onOpenCourse, onOpenAssignment, on
 
       {tab === 'courses' ? (
         <section className="learning-course-list">
-          <div className="list-intro"><h2>{t('In progress')}</h2><span>{t('{count} downloaded courses', { count: filteredCourses.length })}</span></div>
-          {filteredCourses.length ? filteredCourses.map((course) => <CourseRow key={course.id} course={course} onOpen={onOpenCourse} plainLanguage={state.settings.plainLanguage} />) : <EmptyState icon={Search} title={t('No course found')} body={t('Try a different subject or course name.')} />}
+          <div className="list-intro"><h2>{t('In progress')}</h2><span>{t('{count} downloaded courses', { count: downloads.lessonRecords.length })}</span></div>
+          {filteredCourses.length ? filteredCourses.map((course) => <CourseRow key={course.id} course={course} onOpen={onOpenCourse} plainLanguage={state.settings.plainLanguage} isDownloaded={Boolean(downloads.recordMap[course.id])} completedCount={state.courseProgress[course.id]?.length || 0} />) : <EmptyState icon={Search} title={t('No course found')} body={t('Try a different subject or course name.')} />}
         </section>
       ) : null}
 
@@ -61,22 +62,7 @@ export default function LearningPage({ state, onOpenCourse, onOpenAssignment, on
         </section>
       ) : null}
 
-      {tab === 'downloads' ? (
-        <section className="downloads-layout">
-          <div className="panel downloads-main">
-            <div className="section-heading"><div><h2>{t('Saved on this device')}</h2><p>{t('Open every downloaded item without internet.')}</p></div><Download size={22} /></div>
-            {courses.map((course) => {
-              const Icon = course.icon
-              return <div className="download-row" key={course.id}><span className={`download-icon ${course.color}`}><Icon size={20} /></span><div><strong>{t(course.title)}</strong><span>{course.lessonsTotal} {t('lessons')} · {course.size}</span></div><Button variant="quiet" icon={FileText} onClick={() => onDownloadWorksheet(course.id)}>{t('Worksheet')}</Button><span className="download-ready"><CheckCircle2 size={15} /> {t('Ready offline')}</span></div>
-            })}
-          </div>
-          <aside className="panel storage-breakdown">
-            <p className="context-line">{t('Device storage')}</p><h2>{t('{amount} GB used', { amount: state.storageUsed.toFixed(1) })}</h2><Progress value={(state.storageUsed / 16) * 100} />
-            <div className="storage-key"><span><i className="key-lessons" />{t('Lessons')} <em>1.4 GB</em></span><span><i className="key-app" />{t('SyncED app')} <em>0.4 GB</em></span><span><i className="key-other" />{t('Other files')} <em>10.6 GB</em></span></div>
-            <Button variant="secondary" icon={Download} onClick={onDownloadAll}>{t('Check for new lessons')}</Button>
-          </aside>
-        </section>
-      ) : null}
+      {tab === 'downloads' ? <DownloadManager downloads={downloads} storageInfo={storageInfo} onOpenCourse={onOpenCourse} onDownloadPack={onDownloadPack} /> : null}
     </div>
   )
 }

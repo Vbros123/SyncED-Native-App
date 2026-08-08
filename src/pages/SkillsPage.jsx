@@ -3,8 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { skills } from '../data.js'
 import { useI18n } from '../i18n.jsx'
 import { Button, Progress } from '../components/UI.jsx'
-import { LessonCompleteBurst } from '../components/Celebrations.jsx'
-import { playCorrectSound } from '../utils/sounds.js'
+import { CorrectCapBurst } from '../components/Celebrations.jsx'
 
 function SkillLesson({ skill, onClose, onComplete }) {
   const { t } = useI18n()
@@ -16,31 +15,27 @@ function SkillLesson({ skill, onClose, onComplete }) {
   const correct = choice === 'check'
 
   const checkAnswer = () => {
+    if (checked && correct) {
+      setStep(2)
+      return
+    }
     setChecked(true)
-    if (correct) playCorrectSound()
-  }
-
-  const finishLesson = () => {
-    setCelebrationId((current) => current + 1)
-    onComplete(skill.id)
-    setStep(2)
+    if (correct) setCelebrationId((current) => current + 1)
   }
 
   if (step === 2) {
     return (
-      <>
-        <LessonCompleteBurst burstId={celebrationId} />
-        <div className="skill-lesson-complete">
-          <span className="completion-burst"><Check size={42} strokeWidth={3} /></span><p className="context-line">{t('Lesson complete')}</p><h2>{t('That skill is yours.')}</h2><p>{t('You finished {skill}. Your progress is saved on this device and ready to sync.', { skill: t(skill.title) })}</p>
-          <div className="earned-strip"><Sparkles size={20} /><div><strong>{t('+25 learning points')}</strong><span>{t('Points move Nova toward the next upgrade.')}</span></div></div>
-          <Button onClick={onClose}>{t('Back to digital skills')}</Button>
-        </div>
-      </>
+      <div className="skill-lesson-complete">
+        <span className="completion-burst"><Check size={42} strokeWidth={3} /></span><p className="context-line">{t('Lesson complete')}</p><h2>{t('That skill is yours.')}</h2><p>{t('You finished {skill}. Your progress is saved on this device and ready to sync.', { skill: t(skill.title) })}</p>
+        <div className="earned-strip"><Sparkles size={20} /><div><strong>{t('+25 learning points')}</strong><span>{t('Points move Nova toward the next upgrade.')}</span></div></div>
+        <Button onClick={() => { onComplete(skill.id); onClose() }}>{t('Back to digital skills')}</Button>
+      </div>
     )
   }
 
   return (
     <div className="skill-lesson-view">
+      <CorrectCapBurst burstId={celebrationId} />
       <div className="skill-lesson-top"><button className="back-button" onClick={onClose}><ArrowLeft size={18} />{t('Digital skills')}</button><div className="skill-step-progress"><span>{t('Step {current} of 2', { current: step + 1 })}</span><Progress value={(step + 1) * 50} compact /></div></div>
       {step === 0 ? (
         <div className="skill-story">
@@ -66,7 +61,7 @@ function SkillLesson({ skill, onClose, onComplete }) {
             ))}
           </div>
           {checked ? <div className={`answer-feedback ${correct ? 'correct' : 'incorrect'}`}>{correct ? <CheckCircle2 size={18} /> : <ShieldCheck size={18} />}<span>{correct ? <><strong>{t('Exactly.')}</strong> {t('Use a trusted route instead of the message link.')}</> : <><strong>{t('Try once more.')}</strong> {t('Never rush or share a password because a message tells you to.')}</>}</span></div> : null}
-          <Button disabled={!choice} onClick={checked && correct ? finishLesson : checkAnswer}>{checked && correct ? t('Finish lesson') : t('Check answer')}</Button>
+          <Button disabled={!choice} onClick={checkAnswer}>{checked && correct ? t('Finish lesson') : t('Check answer')}</Button>
         </div>
       )}
     </div>

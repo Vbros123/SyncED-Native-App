@@ -1,4 +1,5 @@
 export default {
+  'Not downloaded': 'No descargado',
   'Good morning, Maya': 'Buenos días, Maya',
   'Your lessons are ready. Pick one thing to do next.': 'Tus lecciones están listas. Elige una cosa para hacer ahora.',
   '4-day learning streak': 'Racha de aprendizaje de 4 días',
@@ -703,21 +704,5 @@ export default {
   'Focused': 'Concentrado',
   'Free': 'Gratis',
   'Choose {item}': 'Elegir {item}',
-  'Nova’s new look is saved on this device.': 'El nuevo estilo de Nova está guardado en este dispositivo.',
-  'Complete lesson': 'Completar lección',
-  'Lesson complete! +10 learning points. Progress is queued to sync.': '¡Lección completada! +10 puntos de aprendizaje. El progreso está en cola para sincronizar.',
-  'Offline teacher check': 'Verificación docente sin conexión',
-  'Teacher check': 'Verificación docente',
-  'Ready for teacher check': 'Listo para la verificación docente',
-  'Show this code to your teacher so they can confirm this lesson.': 'Muestra este código a tu docente para confirmar esta lección.',
-  'Student': 'Estudiante',
-  'Lesson': 'Lección',
-  'Course': 'Curso',
-  'Points earned': 'Puntos ganados',
-  'Verification code': 'Código de verificación',
-  'Teacher verification QR code': 'Código QR de verificación docente',
-  'QR code unavailable': 'Código QR no disponible',
-  'Preparing QR code…': 'Preparando el código QR…',
-  'This check works offline. A teacher can scan the code or compare the code and lesson details on screen.': 'Esta verificación funciona sin conexión. Un docente puede escanear el código o comparar el código y los detalles de la lección en pantalla.',
-  'Close teacher check': 'Cerrar verificación docente'
+  'Nova’s new look is saved on this device.': 'El nuevo estilo de Nova está guardado en este dispositivo.'
 }

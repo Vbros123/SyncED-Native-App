@@ -17,6 +17,7 @@ import {
   Video,
   Wifi,
 } from 'lucide-react'
+import { buildExpandedLessons } from './expandedLessons.js'
 
 export const languages = [
   { id: 'en', label: 'English', short: 'EN', dir: 'ltr' },
@@ -26,7 +27,7 @@ export const languages = [
   { id: 'fr', label: 'Français', short: 'FR', dir: 'ltr' },
 ]
 
-export const courses = [
+const coreCourses = [
   {
     id: 'algebra',
     subject: 'Math',
@@ -35,8 +36,10 @@ export const courses = [
     plainDescription: 'Learn how letters and numbers work together in math.',
     progress: 60,
     lessonsDone: 2,
-    lessonsTotal: 3,
-    size: '18 MB',
+    questionsTotal: 6,
+    size: '28 MB',
+    version: 3,
+    updatedAt: '2026-08-07T00:00:00.000Z',
     color: 'blue',
     icon: Calculator,
   },
@@ -48,8 +51,10 @@ export const courses = [
     plainDescription: 'Learn how living things survive and depend on each other.',
     progress: 38,
     lessonsDone: 1,
-    lessonsTotal: 3,
-    size: '22 MB',
+    questionsTotal: 6,
+    size: '34 MB',
+    version: 3,
+    updatedAt: '2026-08-07T00:00:00.000Z',
     color: 'green',
     icon: FlaskConical,
   },
@@ -61,8 +66,10 @@ export const courses = [
     plainDescription: 'Find the main idea and proof in a text.',
     progress: 25,
     lessonsDone: 1,
-    lessonsTotal: 3,
-    size: '12 MB',
+    questionsTotal: 6,
+    size: '20 MB',
+    version: 3,
+    updatedAt: '2026-08-07T00:00:00.000Z',
     color: 'purple',
     icon: BookOpen,
   },
@@ -74,8 +81,10 @@ export const courses = [
     plainDescription: 'Learn how communities make rules and decisions.',
     progress: 0,
     lessonsDone: 0,
-    lessonsTotal: 3,
-    size: '16 MB',
+    questionsTotal: 6,
+    size: '26 MB',
+    version: 3,
+    updatedAt: '2026-08-07T00:00:00.000Z',
     color: 'coral',
     icon: Landmark,
   },
@@ -87,8 +96,10 @@ export const courses = [
     plainDescription: 'Learn how to give a computer clear steps.',
     progress: 0,
     lessonsDone: 0,
-    lessonsTotal: 3,
-    size: '14 MB',
+    questionsTotal: 6,
+    size: '23 MB',
+    version: 3,
+    updatedAt: '2026-08-07T00:00:00.000Z',
     color: 'sky',
     icon: Code2,
   },
@@ -100,8 +111,10 @@ export const courses = [
     plainDescription: 'Learn simple ways to plan, spend, and save money.',
     progress: 0,
     lessonsDone: 0,
-    lessonsTotal: 3,
-    size: '10 MB',
+    questionsTotal: 6,
+    size: '17 MB',
+    version: 3,
+    updatedAt: '2026-08-07T00:00:00.000Z',
     color: 'yellow',
     icon: BriefcaseBusiness,
   },
@@ -114,6 +127,9 @@ export const courseContent = {
       ['An equation is like a balanced scale.', 'Both sides must have the same value.'],
       ['Undo one operation at a time.', 'Do the same thing to both sides.'],
       ['Check your answer.', 'Put the number back into the original equation.'],
+      ['Expressions use variables.', 'Replace the variable with its value before calculating.'],
+      ['Inequalities compare values.', 'A solution makes the comparison true.'],
+      ['Equivalent expressions match.', 'Distribute or simplify to reveal the same value.'],
     ],
     questions: [
       {
@@ -137,6 +153,27 @@ export const courseContent = {
         correct: 1,
         explanation: 'Divide the total by 3. $12 ÷ 3 = $4.',
       },
+      {
+        title: 'Evaluating expressions',
+        prompt: 'What is 2x + 3 when x = 4?',
+        options: ['7', '11', '14'],
+        correct: 1,
+        explanation: 'Replace x with 4: 2 × 4 + 3 = 11.',
+      },
+      {
+        title: 'Understanding inequalities',
+        prompt: 'Which value makes x + 2 > 7 true?',
+        options: ['4', '5', '6'],
+        correct: 2,
+        explanation: 'Using 6 gives 6 + 2 = 8, and 8 is greater than 7.',
+      },
+      {
+        title: 'Equivalent expressions',
+        prompt: 'Which expression is equivalent to 2(n + 3)?',
+        options: ['2n + 3', '5n', '2n + 6'],
+        correct: 2,
+        explanation: 'Distribute 2 to both terms: 2 × n + 2 × 3 = 2n + 6.',
+      },
     ],
   },
   science: {
@@ -145,6 +182,9 @@ export const courseContent = {
       ['Plants capture energy from sunlight.', 'They are producers in a food web.'],
       ['Animals get energy by eating.', 'Consumers depend on plants or other animals.'],
       ['Decomposers recycle matter.', 'They return nutrients to the environment.'],
+      ['Cells have specialized parts.', 'Each part helps the cell carry out life processes.'],
+      ['Photosynthesis stores light energy.', 'Plants use light, water, and carbon dioxide to make food.'],
+      ['Habitats can change.', 'Organisms must move, adapt, or may not survive.'],
     ],
     questions: [
       {
@@ -168,6 +208,27 @@ export const courseContent = {
         correct: 1,
         explanation: 'A thick stem stores water for long dry periods.',
       },
+      {
+        title: 'Cell structures',
+        prompt: 'Which cell part directs most cell activities?',
+        options: ['The nucleus', 'The cell wall', 'The cytoplasm'],
+        correct: 0,
+        explanation: 'The nucleus contains genetic information and directs most cell activities.',
+      },
+      {
+        title: 'Photosynthesis',
+        prompt: 'Which set lists materials plants use to make food?',
+        options: ['Sunlight, water, and carbon dioxide', 'Rock, plastic, and sand', 'Oxygen, soil, and darkness'],
+        correct: 0,
+        explanation: 'Plants use sunlight, water, and carbon dioxide during photosynthesis.',
+      },
+      {
+        title: 'Ecosystem change',
+        prompt: 'What is a likely first effect when a wetland is drained?',
+        options: ['Wetland organisms lose habitat', 'The Moon changes its orbit', 'All nearby soil becomes rock'],
+        correct: 0,
+        explanation: 'Draining removes the water and shelter that wetland organisms depend on.',
+      },
     ],
   },
   reading: {
@@ -176,6 +237,9 @@ export const courseContent = {
       ['Ask what the text is mostly about.', 'That points you toward the main idea.'],
       ['Look for details that repeat or connect.', 'Strong evidence directly supports the idea.'],
       ['Explain the connection in your own words.', 'Do not just copy the sentence.'],
+      ['Readers make inferences.', 'Combine text clues with what you already know.'],
+      ['Text structure organizes ideas.', 'Sequence, cause and effect, and comparison guide the reader.'],
+      ['Context clues unlock words.', 'Nearby examples and descriptions can reveal meaning.'],
     ],
     questions: [
       {
@@ -199,6 +263,27 @@ export const courseContent = {
         correct: 0,
         explanation: 'The word “I” shows that the narrator is telling their own experience.',
       },
+      {
+        title: 'Making inferences',
+        prompt: 'The sidewalk is wet and people are closing umbrellas. What can you infer?',
+        options: ['It rained recently', 'The sidewalk is indoors', 'Everyone lost a shoe'],
+        correct: 0,
+        explanation: 'The wet sidewalk and umbrellas are clues that it rained recently.',
+      },
+      {
+        title: 'Text structure',
+        prompt: 'A passage explains the steps for planting a seed. Which structure does it use?',
+        options: ['Sequence', 'Compare and contrast', 'Problem and solution'],
+        correct: 0,
+        explanation: 'A set of ordered steps uses a sequence structure.',
+      },
+      {
+        title: 'Context clues',
+        prompt: 'The trail was arduous, so we stopped often to rest. What does arduous mean?',
+        options: ['Difficult', 'Colorful', 'Short'],
+        correct: 0,
+        explanation: 'Needing frequent rest is a clue that arduous means difficult.',
+      },
     ],
   },
   history: {
@@ -207,6 +292,9 @@ export const courseContent = {
       ['Communities identify a shared need.', 'Residents can speak, write, organize, and vote.'],
       ['Local leaders review evidence and options.', 'Budgets and laws shape what is possible.'],
       ['The public can track the result.', 'Civic participation continues after a decision.'],
+      ['Public records show decisions.', 'Budgets, minutes, and reports help residents check the facts.'],
+      ['Budgets require tradeoffs.', 'Funding one priority can leave less money for another.'],
+      ['Strong civic claims use evidence.', 'Reliable local data helps communities choose solutions.'],
     ],
     questions: [
       {
@@ -230,6 +318,27 @@ export const courseContent = {
         correct: 1,
         explanation: 'Public comment is a direct, peaceful way to take part in local government.',
       },
+      {
+        title: 'Public records',
+        prompt: 'Which source best shows how a city planned to spend public money?',
+        options: ['The published city budget', 'A restaurant menu', 'A weather forecast'],
+        correct: 0,
+        explanation: 'A published city budget lists planned public spending and priorities.',
+      },
+      {
+        title: 'Community budgets',
+        prompt: 'Choosing between repairing a park and adding a bus stop is an example of what?',
+        options: ['A budget tradeoff', 'A scientific law', 'A private diary'],
+        correct: 0,
+        explanation: 'Limited funds require communities to compare priorities and make tradeoffs.',
+      },
+      {
+        title: 'Evidence and claims',
+        prompt: 'Which evidence best supports adding a safer crosswalk?',
+        options: ['Traffic and crash counts', 'The mayor’s favorite color', 'A rumor with no source'],
+        correct: 0,
+        explanation: 'Traffic and crash counts directly show the safety need at that location.',
+      },
     ],
   },
   computing: {
@@ -238,6 +347,9 @@ export const courseContent = {
       ['An algorithm is a sequence of instructions.', 'The order of the steps matters.'],
       ['Conditions help a program choose.', 'For example: if it rains, open an umbrella.'],
       ['Testing finds mistakes.', 'Try normal, unusual, and boundary cases.'],
+      ['Loops repeat instructions.', 'They save time when the same action happens many times.'],
+      ['Variables store information.', 'A variable can hold a value that changes.'],
+      ['Programs use input and output.', 'Input enters the program and output communicates a result.'],
     ],
     questions: [
       {
@@ -261,6 +373,27 @@ export const courseContent = {
         correct: 1,
         explanation: 'Small, focused tests help you find the exact step causing the problem.',
       },
+      {
+        title: 'Loops',
+        prompt: 'When is a loop most useful?',
+        options: ['When an action must repeat', 'When the computer is turned off', 'When no instructions are needed'],
+        correct: 0,
+        explanation: 'A loop repeats a set of instructions without rewriting every step.',
+      },
+      {
+        title: 'Variables',
+        prompt: 'What does a variable do in a program?',
+        options: ['Stores a value that can change', 'Paints the computer case', 'Disconnects every user'],
+        correct: 0,
+        explanation: 'A variable gives a name to information the program can read or change.',
+      },
+      {
+        title: 'Input and output',
+        prompt: 'Which example shows input followed by output?',
+        options: ['Typing a name and seeing it on screen', 'Closing a powered-off laptop', 'Looking at an unplugged cable'],
+        correct: 0,
+        explanation: 'Typing is input, and the displayed name is output from the program.',
+      },
     ],
   },
   money: {
@@ -269,6 +402,9 @@ export const courseContent = {
       ['Start with money coming in.', 'Use actual amounts instead of guesses when possible.'],
       ['List needs before wants.', 'Food, housing, and transportation come first.'],
       ['Save a small amount consistently.', 'A simple habit grows over time.'],
+      ['Needs and wants are different.', 'Needs protect health and safety; wants add comfort or fun.'],
+      ['Discounts change the final price.', 'Calculate the amount saved before deciding what you can afford.'],
+      ['Emergency savings handle surprises.', 'Even a small reserve can cover an unexpected necessary cost.'],
     ],
     questions: [
       {
@@ -292,9 +428,43 @@ export const courseContent = {
         correct: 2,
         explanation: '$5 × 6 = $30.',
       },
+      {
+        title: 'Needs and wants',
+        prompt: 'Which expense is usually a need?',
+        options: ['Rent for a safe home', 'A second game controller', 'Movie theater snacks'],
+        correct: 0,
+        explanation: 'Safe housing is a basic need that should be planned before optional purchases.',
+      },
+      {
+        title: 'Comparing discounts',
+        prompt: 'A $20 item is 25% off. What is the sale price?',
+        options: ['$5', '$15', '$25'],
+        correct: 1,
+        explanation: 'Twenty-five percent of $20 is $5, so the sale price is $15.',
+      },
+      {
+        title: 'Emergency savings',
+        prompt: 'What is the main purpose of emergency savings?',
+        options: ['Paying an unexpected necessary cost', 'Buying every new product', 'Avoiding all future budgets'],
+        correct: 0,
+        explanation: 'Emergency savings help cover necessary costs you did not expect.',
+      },
     ],
   },
 }
+
+const expandedLessons = buildExpandedLessons({
+  Math: Calculator,
+  Science: FlaskConical,
+  English: BookOpen,
+  History: Landmark,
+  'Computer science': Code2,
+  'Financial literacy': BriefcaseBusiness,
+})
+
+Object.assign(courseContent, expandedLessons.content)
+
+export const courses = [...coreCourses, ...expandedLessons.courses]
 
 export const assignmentsSeed = [
   { id: 1, courseId: 'algebra', course: 'Math', title: 'Practice: equations', instructions: 'Answer the three equation questions and explain one step in your own words.', dueOffsetDays: 0, dueHour: 23, closeOffsetDays: 1, status: 'due', icon: Calculator },
