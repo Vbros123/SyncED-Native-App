@@ -15,7 +15,8 @@
     "qa": "npm run qa:i18n && node scripts/qa.mjs",
     "qa:i18n": "node scripts/i18n-data-audit.mjs",
     "lint": "eslint .",
-    "check": "npm run lint && npm run build && npm run qa"
+    "test": "vitest run",
+    "check": "npm run lint && npm run build && npm run test && npm run qa"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.2",
@@ -38,7 +39,8 @@
     "@sparticuz/chromium": "^149.0.0",
     "eslint": "^10.7.0",
     "globals": "^17.7.0",
-    "playwright-core": "^1.61.1"
+    "playwright-core": "^1.61.1",
+    "vitest": "^4.1.11"
   },
   "description": "Offline-first multilingual education app for web, iOS, and Android.",
   "engines": {
