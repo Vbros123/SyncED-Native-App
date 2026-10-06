@@ -18,7 +18,7 @@
     "check": "npm run lint && npm run build && npm run qa"
   },
   "dependencies": {
-    "@capacitor/android": "^8.4.2",
+    "@capacitor/android": "^8.5.2",
     "@capacitor/core": "^8.5.0",
     "@capacitor/ios": "^8.4.2",
     "@capacitor/splash-screen": "^8.0.2",
