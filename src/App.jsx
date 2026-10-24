@@ -19,6 +19,7 @@ const AiDebugPage = lazy(() => import('./pages/AiDebugPage.jsx'))
 import { assignmentsSeed, courseContent, courses, skills } from './data.js'
 import { usePersistedState } from './hooks/usePersistedState.js'
 import { useI18n } from './i18n.jsx'
+import { assignmentStatus } from './utils/dates.js'
 import { createCompletionRecord } from './utils/completionQr.js'
 
 const initialState = {
@@ -28,6 +29,7 @@ const initialState = {
   assignments: assignmentsSeed,
   completedAssignments: [],
   assignmentResponses: {},
+  assignmentDrafts: {},
   lateAssignments: [],
   completedSkills: [],
   courseProgress: { algebra: [0], science: [], reading: [], history: [], computing: [], money: [] },
@@ -106,10 +108,10 @@ export default function App() {
   const performSync = () => {
     setSyncing(true)
     window.setTimeout(() => {
-      setState((current) => ({ ...current, queueItems: [], lastSync: 'Just now', downloaded: Math.max(current.downloaded, 36) }))
+      // Simulation only: never clear local records or claim delivery.
       setSyncing(false)
       setModal(null)
-      showToast(t('Sync complete—everything is up to date.'))
+      showToast(t('Demo finished. Nothing was sent; your local records are unchanged.'))
     }, 1300)
   }
 
@@ -153,7 +155,7 @@ export default function App() {
       }
     })
     setCompletionQr(createCompletionRecord({ kind: 'course', courseId, courseTitle: course.title, lessonTitle: question.title, points: 10, completedAt }))
-    showToast(t('Lesson complete! +10 learning points. Progress is queued to sync.'))
+    showToast(t('Lesson complete! +10 learning points. Saved on this device.'))
   }
 
   const toggleSave = (key) => {
@@ -161,8 +163,16 @@ export default function App() {
     showToast(state.savedLessons.includes(key) ? t('Removed from saved lessons.') : t('Saved for later on this device.'))
   }
 
-  const submitAssignment = (id, response, isLate) => {
+  const saveAssignmentDraft = (id, response) => setState((current) => ({
+    ...current, assignmentDrafts: { ...current.assignmentDrafts, [id]: response },
+  }))
+
+  const submitAssignment = (id, response) => {
     const assignment = assignmentsSeed.find((item) => item.id === id)
+    if (!assignment || state.completedAssignments.includes(id) || response.trim().length < 3) return
+    const status = assignmentStatus(assignment, false)
+    if (status === 'closed') { showToast(t('Submission closed')); return }
+    const isLate = status === 'late'
     setState((current) => ({
       ...current,
       points: current.completedAssignments.includes(id) ? current.points : current.points + 15,
@@ -172,7 +182,7 @@ export default function App() {
       queueItems: queueItem(current, { id: `assignment-${id}`, label: assignment.title, type: isLate ? 'Late assignment submission' : 'Assignment submission' }),
     }))
     setActiveAssignment(null)
-    showToast(t(isLate ? 'Submitted late and queued to sync. +15 points.' : 'Assignment submitted and queued to sync. +15 points.'))
+    showToast(t(isLate ? 'Saved late on this device. +15 points. Not sent to school.' : 'Saved on this device. +15 points. Not sent to school.'))
   }
 
   const openSkill = (id) => {
@@ -195,16 +205,15 @@ export default function App() {
   const submitDeviceRequest = (id, details) => {
     setState((current) => ({
       ...current,
-      deviceRequests: { ...current.deviceRequests, [id]: { ...details, status: 'Waiting for partner review', reference: `SY-${String(2048 + Object.keys(current.deviceRequests).length).padStart(4, '0')}` } },
-      queueItems: queueItem(current, { id: `device-${id}`, label: 'Device support request', type: 'Support request' }),
+      deviceRequests: { ...current.deviceRequests, [id]: { ...details, status: 'Sample saved on this device', reference: `SY-${String(2048 + Object.keys(current.deviceRequests).length).padStart(4, '0')}` } },
     }))
-    showToast(t('Device request saved. Updates will go to {email} after sync.', { email: details.email }))
+    showToast(t('Sample saved on this device. No request was sent and no reply will arrive.'))
   }
 
   const submitHelp = (request) => {
     const id = `help-${Date.now()}`
-    setState((current) => ({ ...current, helpRequests: [...current.helpRequests, { id, ...request }], queueItems: queueItem(current, { id, label: request.topic, type: 'Helpdesk question' }) }))
-    showToast(t('Helpdesk question saved to the sync queue.'))
+    setState((current) => ({ ...current, helpRequests: [...current.helpRequests, { id, ...request }] }))
+    showToast(t('Sample saved on this device. No request was sent and no reply will arrive.'))
   }
 
   const completeFamilyActivity = () => {
@@ -264,17 +273,17 @@ export default function App() {
 
   return (
     <>
-      <AppShell active={screen} onNavigate={navigate} online={online} setOnline={(value) => { setOnline(value); showToast(t(value ? 'Demo Wi-Fi connected. You can sync now.' : 'Offline mode on. Downloaded work still works.')) }} storageUsed={state.storageUsed} plainLanguage={state.settings.plainLanguage}>{content}</AppShell>
+      <AppShell active={screen} onNavigate={navigate} online={online} setOnline={(value) => { setOnline(value); showToast(t(value ? 'Demo connection on' : 'Offline mode on. Downloaded work still works.')) }} storageUsed={state.storageUsed} plainLanguage={state.settings.plainLanguage}>{content}</AppShell>
       {showLaunch ? <LaunchSequence onComplete={finishLaunch} /> : null}
       <Toast message={toast} onClose={() => setToast('')} />
 
       {completionQr ? <CompletionQrModal completion={completionQr} onClose={() => setCompletionQr(null)} /> : null}
 
-      <AssignmentModal assignment={selectedAssignment} completed={selectedAssignment ? state.completedAssignments.includes(selectedAssignment.id) : false} savedResponse={selectedAssignment ? state.assignmentResponses[selectedAssignment.id] : ''} onClose={() => setActiveAssignment(null)} onSubmit={submitAssignment} onOpenCourse={openCourse} onDownloadWorksheet={downloadWorksheet} />
+      {selectedAssignment ? <AssignmentModal assignment={selectedAssignment} completed={selectedAssignment ? state.completedAssignments.includes(selectedAssignment.id) : false} savedResponse={selectedAssignment ? (state.completedAssignments.includes(selectedAssignment.id) ? state.assignmentResponses[selectedAssignment.id] : state.assignmentDrafts[selectedAssignment.id]) || '' : ''} onDraftChange={saveAssignmentDraft} onClose={() => setActiveAssignment(null)} onSubmit={submitAssignment} onOpenCourse={openCourse} onDownloadWorksheet={downloadWorksheet} /> : null}
       {modal === 'calendar' ? <CalendarModal completedAssignments={state.completedAssignments} onClose={() => setModal(null)} onOpenAssignment={(id) => { setModal(null); setActiveAssignment(id) }} /> : null}
       {modal === 'queue' ? <SyncQueueModal queueItems={state.queueItems} online={online} onSync={performSync} onClose={() => setModal(null)} /> : null}
 
-      {modal === 'offline' ? <Modal title={t('You’re ready to learn offline')} onClose={() => setModal(null)}><div className="offline-modal"><span className="offline-modal-icon"><WifiOff size={32} /></span><p>{t('Downloaded lessons, mini-videos, worksheets, and assignments still work. Connect at a trusted hub when you are ready to send {count} queued items.', { count: state.queueItems.length })}</p><div className="offline-hub-row"><MapPin size={20} /><div><strong>Riverside Community Center</strong><span>0.6 {t('miles')} · {t('Open until 6:00 PM')}</span></div></div><div className="form-actions"><Button variant="quiet" onClick={() => setModal(null)}>{t('Keep learning')}</Button><Button icon={RefreshCw} onClick={() => { setOnline(true); window.setTimeout(performSync, 50) }}>{t('Simulate hub Wi-Fi')}</Button></div></div></Modal> : null}
+      {modal === 'offline' ? <Modal title={t('You’re ready to learn offline')} onClose={() => setModal(null)}><div className="offline-modal"><span className="offline-modal-icon"><WifiOff size={32} /></span><p>{t('Demo only. Work stays on this device; nothing is sent to a school.')}</p><div className="offline-hub-row"><MapPin size={20} /><div><strong>Riverside Community Center</strong><span>0.6 {t('miles')} · {t('Open until 6:00 PM')}</span></div></div><div className="form-actions"><Button variant="quiet" onClick={() => setModal(null)}>{t('Keep learning')}</Button><Button icon={RefreshCw} onClick={() => { setOnline(true); window.setTimeout(performSync, 50) }}>{t('Simulate hub Wi-Fi')}</Button></div></div></Modal> : null}
 
       {modal === 'clear' ? <Modal title={t('Remove downloaded lessons?')} onClose={() => setModal(null)}><div className="confirm-modal"><span><CheckCircle2 size={26} /></span><p>{t('This frees about 1.8 GB. Progress, completed work, family profiles, and settings stay safe. You will need Wi-Fi to download lesson media again.')}</p><div className="form-actions"><Button variant="quiet" onClick={() => setModal(null)}>{t('Cancel')}</Button><Button variant="danger" onClick={confirmClearDownloads}>{t('Remove downloads')}</Button></div></div></Modal> : null}
     </>

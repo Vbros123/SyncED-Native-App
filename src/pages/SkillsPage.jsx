@@ -31,7 +31,7 @@ function SkillLesson({ skill, onClose, onComplete }) {
       <>
         <LessonCompleteBurst burstId={celebrationId} />
         <div className="skill-lesson-complete">
-          <span className="completion-burst"><Check size={42} strokeWidth={3} /></span><p className="context-line">{t('Lesson complete')}</p><h2>{t('That skill is yours.')}</h2><p>{t('You finished {skill}. Your progress is saved on this device and ready to sync.', { skill: t(skill.title) })}</p>
+          <span className="completion-burst"><Check size={42} strokeWidth={3} /></span><p className="context-line">{t('Lesson complete')}</p><h2>{t('That skill is yours.')}</h2><p>{t('You finished {skill}. Your progress stays on this device.', { skill: t(skill.title) })}</p>
           <div className="earned-strip"><Sparkles size={20} /><div><strong>{t('+25 learning points')}</strong><span>{t('Points move Nova toward the next upgrade.')}</span></div></div>
           <Button onClick={onClose}>{t('Back to digital skills')}</Button>
         </div>

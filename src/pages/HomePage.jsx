@@ -17,7 +17,7 @@ import SyncPanel from '../components/SyncPanel.jsx'
 import { Button, Progress, TextButton } from '../components/UI.jsx'
 import { courses, hubs, skills } from '../data.js'
 import { useI18n } from '../i18n.jsx'
-import { assignmentDates, assignmentStatus } from '../utils/dates.js'
+import { assignmentDates, assignmentStatus, assignmentTimeZone } from '../utils/dates.js'
 
 export default function HomePage({
   online,
@@ -86,9 +86,9 @@ export default function HomePage({
                   <span className="assignment-check">{isDone ? <Check size={15} strokeWidth={3} /> : <Icon size={18} />}</span>
                   <span className="assignment-row-copy">
                     <strong>{t(assignment.title)}</strong>
-                    <small>{t(assignment.course)} · {isDone ? t('Completed') : t('Due {date}', { date: formatDate(due, { weekday: 'short', hour: 'numeric', minute: '2-digit' }) })}</small>
+                    <small>{t(assignment.course)} · {isDone ? t('Completed') : t('Due {date}', { date: formatDate(due, { timeZone: assignmentTimeZone, timeZoneName: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) })}</small>
                   </span>
-                  {!isDone && status === 'due' ? <em>{t('Due soon')}</em> : status === 'late' ? <em className="late">{t('Late')}</em> : null}
+                  {!isDone && status === 'due' ? <em>{t('Due soon')}</em> : status === 'late' ? <em className="late">{t('Late')}</em> : status === 'closed' ? <em>{t('Closed')}</em> : null}
                 </button>
               )
             })}

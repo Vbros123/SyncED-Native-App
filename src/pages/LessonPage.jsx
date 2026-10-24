@@ -21,6 +21,7 @@ import { LessonCompleteBurst } from '../components/Celebrations.jsx'
 import { courseContent, courses } from '../data.js'
 import { useI18n } from '../i18n.jsx'
 import { playCorrectSound } from '../utils/sounds.js'
+import AiTutor from '../components/AiTutor.jsx'
 
 function MiniVideo({ content }) {
   const { t } = useI18n()
@@ -57,7 +58,7 @@ function MiniVideo({ content }) {
 }
 
 export default function LessonPage({ courseId, lessonIndex, state, onBack, onChangeLesson, onCompleteQuestion, onToggleSave, onViewQueue, onDownloadWorksheet }) {
-  const { t } = useI18n()
+  const { t, language } = useI18n()
   const course = useMemo(() => courses.find((item) => item.id === courseId) || courses[0], [courseId])
   const content = courseContent[course.id]
   const question = content.questions[lessonIndex] || content.questions[0]
@@ -132,6 +133,8 @@ export default function LessonPage({ courseId, lessonIndex, state, onBack, onCha
             {checked && !correct ? <div className="answer-feedback incorrect"><RotateCcw size={18} /><span><strong>{t('Try again.')}</strong> {t('Review the video and choose the answer that best matches the key idea.')}</span></div> : null}
           </section>
 
+          <AiTutor key={`${course.id}:${lessonIndex}:${language}`} question={question} />
+
           <div className="lesson-actions">
             <Button variant="secondary" icon={ChevronLeft} disabled={lessonIndex === 0} onClick={() => onChangeLesson(lessonIndex - 1)}>{t('Previous')}</Button>
             <Button variant="quiet" icon={saved ? BookmarkCheck : Bookmark} onClick={() => onToggleSave(savedKey)}>{saved ? t('Saved for later') : t('Save for later')}</Button>
@@ -145,7 +148,7 @@ export default function LessonPage({ courseId, lessonIndex, state, onBack, onCha
           </div>
 
           <div className="lesson-resource-actions"><Button variant="quiet" icon={FileText} onClick={() => onDownloadWorksheet(course.id)}>{t('Download worksheet')}</Button><span>{t('The worksheet is saved as a printable file and works offline.')}</span></div>
-          <div className="queued-note"><CloudUpload size={22} /><div><strong>{t('Your work is saved offline')}</strong><span>{t('Completed work will upload automatically when you reconnect.')}</span></div><button onClick={onViewQueue}>{t('View sync queue')}</button></div>
+          <div className="queued-note"><CloudUpload size={22} /><div><strong>{t('Your work is saved offline')}</strong><span>{t('Demo only. Work stays on this device; nothing is sent to a school.')}</span></div><button onClick={onViewQueue}>{t('View sync queue')}</button></div>
         </article>
 
         <aside className="panel lesson-outline">

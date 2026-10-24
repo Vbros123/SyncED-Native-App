@@ -297,9 +297,9 @@ export const courseContent = {
 }
 
 export const assignmentsSeed = [
-  { id: 1, courseId: 'algebra', course: 'Math', title: 'Practice: equations', instructions: 'Answer the three equation questions and explain one step in your own words.', dueOffsetDays: 0, dueHour: 23, closeOffsetDays: 1, status: 'due', icon: Calculator },
-  { id: 2, courseId: 'science', course: 'Science', title: 'Ecosystem worksheet', instructions: 'Complete the producer, consumer, and adaptation questions.', dueOffsetDays: 1, dueHour: 17, closeOffsetDays: 3, status: 'todo', icon: FlaskConical },
-  { id: 3, courseId: 'reading', course: 'English', title: 'Reading response', instructions: 'Choose the best evidence and write one sentence explaining why it supports the main idea.', dueOffsetDays: 3, dueHour: 17, closeOffsetDays: 5, status: 'todo', icon: BookOpen },
+  { id: 1, courseId: 'algebra', course: 'Math', title: 'Practice: equations', instructions: 'Answer the three equation questions and explain one step in your own words.', dueAt: '2026-09-21T23:00:00Z', closesAt: '2026-09-22T23:59:59.999Z', status: 'due', icon: Calculator },
+  { id: 2, courseId: 'science', course: 'Science', title: 'Ecosystem worksheet', instructions: 'Complete the producer, consumer, and adaptation questions.', dueAt: '2026-09-22T17:00:00Z', closesAt: '2026-09-24T23:59:59.999Z', status: 'todo', icon: FlaskConical },
+  { id: 3, courseId: 'reading', course: 'English', title: 'Reading response', instructions: 'Choose the best evidence and write one sentence explaining why it supports the main idea.', dueAt: '2026-09-24T17:00:00Z', closesAt: '2026-09-26T23:59:59.999Z', status: 'todo', icon: BookOpen },
 ]
 
 export const skills = [

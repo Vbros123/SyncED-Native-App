@@ -1,18 +1,13 @@
-export function assignmentDates(assignment, reference = new Date()) {
-  const start = new Date(reference)
-  start.setHours(0, 0, 0, 0)
-  const due = new Date(start)
-  due.setDate(due.getDate() + assignment.dueOffsetDays)
-  due.setHours(assignment.dueHour, 0, 0, 0)
-  const closes = new Date(start)
-  closes.setDate(closes.getDate() + assignment.closeOffsetDays)
-  closes.setHours(23, 59, 59, 999)
-  return { due, closes }
+// Assignment timestamps are fixed instants. Display deadlines in UTC on every device.
+export const assignmentTimeZone = 'UTC'
+
+export function assignmentDates(assignment) {
+  return { due: new Date(assignment.dueAt), closes: new Date(assignment.closesAt) }
 }
 
 export function assignmentStatus(assignment, completed, reference = new Date()) {
   if (completed) return 'completed'
-  const { due, closes } = assignmentDates(assignment, reference)
+  const { due, closes } = assignmentDates(assignment)
   if (reference > closes) return 'closed'
   if (reference > due) return 'late'
   const hours = (due.getTime() - reference.getTime()) / 3_600_000

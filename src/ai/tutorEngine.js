@@ -11,6 +11,15 @@ function resolveModelId(probe, modelList) {
 }
 
 let enginePromise = null
+let loadedTutor = null
+
+// A timed-out worker may not answer unload messages. Termination releases it
+// immediately and lets the next user request start with a fresh engine.
+export function terminateTutorEngine() {
+  loadedTutor?.worker.terminate()
+  loadedTutor = null
+  enginePromise = null
+}
 
 export async function loadTutorEngine(onProgress) {
   if (enginePromise) return enginePromise
@@ -31,11 +40,16 @@ export async function loadTutorEngine(onProgress) {
     const modelId = resolveModelId(probe, prebuiltAppConfig.model_list)
     const worker = new Worker(new URL('./tutor.worker.js', import.meta.url), { type: 'module' })
 
-    const engine = await CreateWebWorkerMLCEngine(worker, modelId, {
-      initProgressCallback: onProgress,
-    })
-
-    return { engine, modelId, worker }
+    try {
+      const engine = await CreateWebWorkerMLCEngine(worker, modelId, {
+        initProgressCallback: onProgress,
+      })
+      loadedTutor = { engine, modelId, worker }
+      return loadedTutor
+    } catch (error) {
+      worker.terminate()
+      throw error
+    }
   })()
 
   try {
@@ -55,5 +69,6 @@ export async function unloadTutorEngine() {
     await loaded.engine.unload()
   } finally {
     loaded.worker.terminate()
+    if (loadedTutor === loaded) loadedTutor = null
   }
 }

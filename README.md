@@ -15,7 +15,13 @@ Generated `dist/` files, dependencies, signing credentials, and machine-specific
 
 ## No backend
 
-This version intentionally has no backend, database server, login server, API key, or cloud dependency. Progress and settings use on-device browser storage. The visible sync queue and connection controls are an offline-learning demonstration and do not send data to a server.
+This version intentionally has no backend, database server, login server, API key, or cloud dependency. Progress and settings use on-device browser storage. The visible sync queue and connection controls are an offline-learning demonstration and do not send data to a server. Simulating sync keeps all local records unchanged and never marks work as received by a school. Support forms use a fixed fictional contact address and save samples locally; no partner receives them and no reply is sent.
+
+## Assignment demo dates and drafts
+
+Assignment drafts are saved separately by assignment ID, including when a dialog is closed or the app is reloaded. Saved submissions reopen with their original response.
+
+The sample assignments have fixed UTC deadlines from September 21 to 24, 2026, and closing times from September 22 to 26, 2026, defined in `src/data.js` as `dueAt` and `closesAt`. They become late and then close as time passes; reopening the app does not move the dates. For a later demonstration, deliberately update those sample timestamps before building. Existing submitted work remains viewable after closing.
 
 ## Run it on a Mac or PC
 
@@ -76,6 +82,8 @@ npm run native:sync
 
 ## Working features
 
+- Optional on-device AI hints in every lesson. Open a lesson and select **Download / use AI hint**. The first model download is large and requires internet; allow it to finish. WebGPU support and enough device memory are required, including inside native WebViews. If unsupported, loading fails, or a generated hint fails validation, the learning tip remains available. AI hints may be inaccurate. No API key or AI server is used; model files are fetched from the model provider and cached by the browser. Cache eviction may require downloading again. Use `#debug-ai` to inspect device capability.
+
 - Complete English, Spanish, Hindi, Arabic, and French interfaces, lessons, worksheets, and instructions; Arabic switches the layout to right-to-left
 - Upgraded animated welcome sequence with auroras, learning icons, students, and rising/falling graduation caps
 - Offline correct-answer chimes generated in the browser; full graduation-cap celebrations are reserved for completed lessons
@@ -85,7 +93,7 @@ npm run native:sync
 - Offline app shell, local progress, a visible sync queue, simulated connection controls, and automatic reload while offline
 - Nova companion with separately fitted headwear and accessories, four face colors, four body colors, three moods, points, unlockable gear, achievements, and a privacy-controlled simulated class leaderboard
 - Searchable course explorer, digital-skills lessons, family learning, and shared goals
-- Searchable community hub directory with service filters, optional browser location, directions, eligibility notes, and email-based device-support requests
+- Searchable community hub directory with service filters, optional browser location, directions, eligibility notes, and sample device-support requests with fictional contact details
 - Light, dark, high-contrast, four accent colors, larger text, plain-language mode, and collapsible desktop navigation
 - Helpdesk flow, nonprofit and partnership explanation, sourced impact evidence, and a plain-language privacy/data plan
 - Responsive desktop, tablet, and mobile layouts with keyboard focus states and reduced-motion support
@@ -116,3 +124,5 @@ npm run qa
 ```
 
 The QA journey checks the launch animation, correct-answer sound triggers, lesson-completion celebrations, assignment submission, calendars, all six subjects, downloads, lesson controls, Nova customization and fitted gear, location search, device requests, themes, every translated screen, Arabic/RTL rendering, privacy sources, collapsed navigation, mobile overflow, console errors, service-worker control, and an offline reload.
+
+Browser QA uses Microsoft Edge on Windows, Chrome on macOS, and bundled Chromium on Linux. Set `SYNCED_BROWSER_PATH` to use a different installed Chromium browser. QA fixes its clock to September 20, 2026 so deadline tests remain repeatable.
