@@ -22,15 +22,15 @@ import { useI18n } from '../i18n.jsx'
 
 function DeviceRequest({ program, existingRequest, onClose, onSubmit }) {
   const { t } = useI18n()
-  const [name, setName] = useState('Maya Johnson')
-  const [email, setEmail] = useState('')
-  const [school, setSchool] = useState('Jefferson Middle School')
+  const name = 'Maya Johnson'
+  const email = 'maya@example.com'
+  const school = 'Jefferson Middle School'
   const [need, setNeed] = useState('I need a device I can use for schoolwork at home.')
   if (existingRequest) {
     return (
       <div className="request-success">
-        <span><Check size={30} strokeWidth={3} /></span><h3>{t('Request received')}</h3><p>{t('Your request is saved on this device. Updates will be sent to {email} after the next secure sync.', { email: existingRequest.email })}</p>
-        <div><small>{t('Status')}</small><strong>{t(existingRequest.status)}</strong><span>{t('Reference {reference}', { reference: existingRequest.reference })}</span></div>
+        <span><Check size={30} strokeWidth={3} /></span><h3>{t('Sample saved on this device')}</h3><p>{t('Sample saved on this device. No request was sent and no reply will arrive.')}</p>
+        <div><small>{t('Status')}</small><strong>{t('Sample saved on this device')}</strong><span>{t('Reference {reference}', { reference: existingRequest.reference })}</span></div>
         <Button onClick={onClose}>{t('Done')}</Button>
       </div>
     )
@@ -38,13 +38,12 @@ function DeviceRequest({ program, existingRequest, onClose, onSubmit }) {
   return (
     <form className="device-form" onSubmit={(event) => { event.preventDefault(); onSubmit(program.id, { name, email, school, need }) }}>
       <div className="program-summary"><program.icon size={25} /><div><strong>{t(program.title)}</strong><span>{t(program.partner)}</span></div></div>
-      <p>{t('This prototype saves the request on this device. A participating school or community partner reviews eligibility after sync; families do not upload income documents here.')}</p>
-      <label>{t('Student or family name')}<input required value={name} onChange={(event) => setName(event.target.value)} /></label>
-      <label>{t('Email for request updates')}<span className="input-with-icon"><Mail size={16} /><input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@example.com" /></span></label>
-      <label>{t('School or community partner')}<input required value={school} onChange={(event) => setSchool(event.target.value)} /></label>
+      <p>{t('Sample form only. Use fictional details. Nothing is sent and no reply will arrive.')}</p>
+      <label>{t('Student or family name')}<input readOnly value={name} /></label>
+      <label>{t('Sample email (not contacted)')}<span className="input-with-icon"><Mail size={16} /><input type="email" readOnly value={email} placeholder="name@example.com" /></span></label>
+      <label>{t('School or community partner')}<input readOnly value={school} /></label>
       <label>{t('What support would help?')}<textarea required value={need} onChange={(event) => setNeed(event.target.value)} rows="3" /></label>
-      <label className="consent-check"><input type="checkbox" required /><span>{t('I agree that this contact information can be shared with the selected school or community partner for this request.')}</span></label>
-      <div className="form-actions"><Button type="button" variant="quiet" onClick={onClose}>{t('Cancel')}</Button><Button type="submit">{t('Save request')}</Button></div>
+      <div className="form-actions"><Button type="button" variant="quiet" onClick={onClose}>{t('Cancel')}</Button><Button type="submit">{t('Save sample')}</Button></div>
     </form>
   )
 }
@@ -133,10 +132,10 @@ export default function HubsPage({ state, online, onSubmitDeviceRequest, onShowT
         </div>
       ) : (
         <section className="device-support-layout">
-          <div className="device-intro">
+          <div className="device-intro"><p>{t('Sample form only. Use fictional details. Nothing is sent and no reply will arrive.')}</p>
             <p className="context-line">{t('No device? Start here.')}</p><h2>{t('One request, trusted local partners')}</h2><p>{t('SyncED is designed to work with school districts, libraries, and community organizations. A partner confirms eligibility using programs it already manages, so the app does not collect family income documents.')}</p>
             <div className="eligibility-note"><ShieldCheck size={21} /><div><strong>{t('Privacy-first eligibility')}</strong><span>{t('School referral, existing program eligibility, or partner review—not a public income score.')}</span></div></div>
-            <div className="device-steps"><span><b>1</b>{t('Choose support')}</span><i /><span><b>2</b>{t('Add an email for updates')}</span><i /><span><b>3</b>{t('Partner follows up')}</span></div>
+            <div className="device-steps"><span><b>1</b>{t('Choose support')}</span><i /><span><b>2</b>{t('Sample email (not contacted)')}</span><i /><span><b>3</b>{t('Sample saved on this device')}</span></div>
           </div>
           <div className="device-program-list">
             {devicePrograms.map((program) => {
@@ -145,8 +144,8 @@ export default function HubsPage({ state, online, onSubmitDeviceRequest, onShowT
               return (
                 <article className="device-program" key={program.id}>
                   <span className="device-program-icon"><Icon size={27} /></span>
-                  <div><small>{t(program.partner)}</small><h3>{t(program.title)}</h3><p>{t(program.description)}</p><em>{requested ? <><Check size={14} /> {t(requested.status)}</> : t(program.availability)}</em></div>
-                  <Button variant={requested ? 'quiet' : 'secondary'} icon={requested ? Check : ExternalLink} onClick={() => setRequestProgram(program.id)}>{requested ? t('View request') : t('Request support')}</Button>
+                  <div><small>{t(program.partner)}</small><h3>{t(program.title)}</h3><p>{t(program.description)}</p><em>{requested ? <><Check size={14} /> {t('Sample saved on this device')}</> : t(program.availability)}</em></div>
+                  <Button variant={requested ? 'quiet' : 'secondary'} icon={requested ? Check : ExternalLink} onClick={() => setRequestProgram(program.id)}>{requested ? t('View request') : t('Try sample request')}</Button>
                 </article>
               )
             })}
@@ -154,7 +153,7 @@ export default function HubsPage({ state, online, onSubmitDeviceRequest, onShowT
         </section>
       )}
 
-      {requestProgram ? <Modal title={t('Request device support')} eyebrow={t('Saved securely on this device')} onClose={() => setRequestProgram(null)}><DeviceRequest program={devicePrograms.find((program) => program.id === requestProgram)} existingRequest={state.deviceRequests[requestProgram]} onClose={() => setRequestProgram(null)} onSubmit={(id, details) => onSubmitDeviceRequest(id, details)} /></Modal> : null}
+      {requestProgram ? <Modal title={t('Sample device request')} eyebrow={t('Saved on this device')} onClose={() => setRequestProgram(null)}><DeviceRequest program={devicePrograms.find((program) => program.id === requestProgram)} existingRequest={state.deviceRequests[requestProgram]} onClose={() => setRequestProgram(null)} onSubmit={(id, details) => onSubmitDeviceRequest(id, details)} /></Modal> : null}
     </div>
   )
 }

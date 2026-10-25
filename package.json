@@ -15,20 +15,22 @@
     "qa": "npm run qa:i18n && node scripts/qa.mjs",
     "qa:i18n": "node scripts/i18n-data-audit.mjs",
     "lint": "eslint .",
-    "check": "npm run lint && npm run build && npm run qa"
+    "test": "vitest run",
+    "check": "npm run lint && npm run build && npm run test && npm run qa"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",
     "@capacitor/core": "^8.5.0",
     "@capacitor/ios": "^8.5.2",
     "@capacitor/splash-screen": "^8.0.2",
-    "@vitejs/plugin-react": "latest",
-    "lucide-react": "latest",
+    "@vitejs/plugin-react": "*",
+    "lucide-react": "*",
     "qrcode": "^1.5.4",
-    "react": "latest",
+    "react": "*",
     "react-dom": "latest",
-    "typescript": "latest",
-    "vite": "latest"
+    "typescript": "*",
+    "vite": "*",
+    "@mlc-ai/web-llm": "^0.2.84"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
@@ -37,7 +39,8 @@
     "@sparticuz/chromium": "^149.0.0",
     "eslint": "^10.7.0",
     "globals": "^17.7.0",
-    "playwright-core": "^1.61.1"
+    "playwright-core": "^1.61.1",
+    "vitest": "^4.1.11"
   },
   "description": "Offline-first multilingual education app for web, iOS, and Android.",
   "engines": {

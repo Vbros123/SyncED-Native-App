@@ -1,6 +1,8 @@
 import { createContext, useContext, useMemo, useState } from 'react'
 import { languages } from './data.js'
 import { extendedMessages } from './locales/extended.js'
+import { demoMessages } from './locales/demo.js'
+import { aiMessages } from './locales/ai.js'
 
 const baseMessages = {
   es: {
@@ -242,7 +244,7 @@ const baseMessages = {
 }
 
 const messages = Object.fromEntries(
-  Object.entries(baseMessages).map(([language, values]) => [language, { ...values, ...(extendedMessages[language] || {}) }]),
+  Object.entries(baseMessages).map(([language, values]) => [language, { ...values, ...(extendedMessages[language] || {}), ...(demoMessages[language] || {}), ...(aiMessages[language] || {}) }]),
 )
 
 const I18nContext = createContext(null)

@@ -4,7 +4,7 @@ import CourseRow from '../components/CourseRow.jsx'
 import { Button, EmptyState, Progress } from '../components/UI.jsx'
 import { courses } from '../data.js'
 import { useI18n } from '../i18n.jsx'
-import { assignmentDates, assignmentStatus } from '../utils/dates.js'
+import { assignmentDates, assignmentStatus, assignmentTimeZone } from '../utils/dates.js'
 
 export default function LearningPage({ state, onOpenCourse, onOpenAssignment, onDownloadAll, onDownloadWorksheet, initialTab = 'courses' }) {
   const { t, formatDate } = useI18n()
@@ -43,7 +43,7 @@ export default function LearningPage({ state, onOpenCourse, onOpenAssignment, on
 
       {tab === 'assignments' ? (
         <section className="panel assignment-workspace">
-          <div className="section-heading"><div><h2>{t('Assignments')}</h2><p>{t('Due times are checked on this device and confirmed by your school after sync.')}</p></div><ListChecks size={22} /></div>
+          <div className="section-heading"><div><h2>{t('Assignments')}</h2><p>{t('Deadlines are fixed in UTC and checked on this device. No school receives this demo work.')}</p></div><ListChecks size={22} /></div>
           {state.assignments.map((assignment) => {
             const Icon = assignment.icon
             const done = state.completedAssignments.includes(assignment.id)
@@ -52,7 +52,7 @@ export default function LearningPage({ state, onOpenCourse, onOpenAssignment, on
             return (
               <button className={`assignment-detail-row ${done ? 'assignment-done' : ''}`} key={assignment.id} onClick={() => onOpenAssignment(assignment.id)}>
                 <span className="assignment-course-icon"><Icon size={20} /></span>
-                <span className="assignment-detail-copy"><small>{t(assignment.course)}</small><strong>{t(assignment.title)}</strong><p>{done ? t('Saved on this device · Queued to upload') : t('Due {date}', { date: formatDate(due, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) })}</p></span>
+                <span className="assignment-detail-copy"><small>{t(assignment.course)}</small><strong>{t(assignment.title)}</strong><p>{done ? t('Not sent to school') : t('Due {date}', { date: formatDate(due, { timeZone: assignmentTimeZone, timeZoneName: 'short', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) })}</p></span>
                 <span className={`assignment-state ${status}`}>{done ? <><CheckCircle2 size={15} /> {t('Completed')}</> : t(status === 'due' ? 'Due soon' : status === 'late' ? 'Late' : status === 'closed' ? 'Closed' : 'To do')}</span>
                 <span className="button button-secondary"><span>{done ? t('View submission') : t('Open assignment')}</span></span>
               </button>
@@ -73,7 +73,7 @@ export default function LearningPage({ state, onOpenCourse, onOpenAssignment, on
           <aside className="panel storage-breakdown">
             <p className="context-line">{t('Device storage')}</p><h2>{t('{amount} GB used', { amount: state.storageUsed.toFixed(1) })}</h2><Progress value={(state.storageUsed / 16) * 100} />
             <div className="storage-key"><span><i className="key-lessons" />{t('Lessons')} <em>1.4 GB</em></span><span><i className="key-app" />{t('SyncED app')} <em>0.4 GB</em></span><span><i className="key-other" />{t('Other files')} <em>10.6 GB</em></span></div>
-            <Button variant="secondary" icon={Download} onClick={onDownloadAll}>{t('Check for new lessons')}</Button>
+            <Button variant="secondary" icon={Download} onClick={onDownloadAll}>{t('Simulate sync')}</Button>
           </aside>
         </section>
       ) : null}
