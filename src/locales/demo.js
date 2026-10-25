@@ -1,0 +1,30 @@
+// Copy shared by the local-only competition demo, in es/hi/ar/fr order.
+const entries = {
+  'Demo only. Work stays on this device; nothing is sent to a school.': ['Solo demostración. El trabajo queda en este dispositivo; no se envía a una escuela.', 'केवल डेमो। काम इसी डिवाइस पर रहता है; स्कूल को कुछ नहीं भेजा जाता।', 'عرض تجريبي فقط. يبقى العمل على هذا الجهاز ولا يُرسل إلى المدرسة.', 'Démonstration uniquement. Le travail reste sur cet appareil ; rien n’est envoyé à une école.'],
+  'Demo finished. Nothing was sent; your local records are unchanged.': ['Demostración terminada. No se envió nada; tus registros locales no han cambiado.', 'डेमो पूरा हुआ। कुछ नहीं भेजा गया; स्थानीय रिकॉर्ड नहीं बदले।', 'انتهى العرض. لم يُرسل شيء ولم تتغير سجلاتك المحلية.', 'Démonstration terminée. Rien n’a été envoyé ; vos données locales sont inchangées.'],
+  'Simulate sync': ['Simular sincronización', 'सिंक का डेमो चलाएँ', 'محاكاة المزامنة', 'Simuler la synchronisation'],
+  'Simulating sync': ['Simulando sincronización', 'सिंक का डेमो चल रहा है', 'جارٍ محاكاة المزامنة', 'Simulation en cours'],
+  'Demo connection on': ['Conexión de demostración activada', 'डेमो कनेक्शन चालू', 'الاتصال التجريبي مفعّل', 'Connexion de démonstration activée'],
+  'Demo connection off': ['Conexión de demostración desactivada', 'डेमो कनेक्शन बंद', 'الاتصال التجريبي متوقف', 'Connexion de démonstration désactivée'],
+  'Local records': ['Registros locales', 'स्थानीय रिकॉर्ड', 'السجلات المحلية', 'Données locales'],
+  'School delivery': ['Envío a la escuela', 'स्कूल को भेजना', 'الإرسال إلى المدرسة', 'Envoi à l’école'],
+  'Not sent to school': ['No enviado a la escuela', 'स्कूल को नहीं भेजा गया', 'لم يُرسل إلى المدرسة', 'Non envoyé à l’école'],
+  'Deadlines are fixed in UTC and checked on this device. No school receives this demo work.': ['Los plazos son fijos, en UTC, y se comprueban en este dispositivo. Ninguna escuela recibe este trabajo de demostración.', 'समय-सीमाएँ UTC में तय हैं और इस डिवाइस पर जाँची जाती हैं। यह डेमो काम किसी स्कूल को नहीं मिलता।', 'المواعيد ثابتة بتوقيت UTC ويجري التحقق منها على هذا الجهاز. لا تتلقى أي مدرسة هذا العمل التجريبي.', 'Les échéances sont fixes, en UTC, et vérifiées sur cet appareil. Aucune école ne reçoit ce travail de démonstration.'],
+  'Lesson complete! +10 learning points. Saved on this device.': ['¡Lección completada! +10 puntos. Guardado en este dispositivo.', 'पाठ पूरा! +10 सीखने के अंक। इस डिवाइस पर सहेजा गया।', 'اكتمل الدرس! +10 نقاط تعلم. محفوظ على هذا الجهاز.', 'Leçon terminée ! +10 points. Enregistré sur cet appareil.'],
+  'Saved late on this device. +15 points. Not sent to school.': ['Guardado tarde en este dispositivo. +15 puntos. No enviado a la escuela.', 'इस डिवाइस पर देर से सहेजा गया। +15 अंक। स्कूल को नहीं भेजा गया।', 'حُفظ متأخرًا على هذا الجهاز. +15 نقطة. لم يُرسل إلى المدرسة.', 'Enregistré en retard sur cet appareil. +15 points. Non envoyé à l’école.'],
+  'Saved on this device. +15 points. Not sent to school.': ['Guardado en este dispositivo. +15 puntos. No enviado a la escuela.', 'इस डिवाइस पर सहेजा गया। +15 अंक। स्कूल को नहीं भेजा गया।', 'محفوظ على هذا الجهاز. +15 نقطة. لم يُرسل إلى المدرسة.', 'Enregistré sur cet appareil. +15 points. Non envoyé à l’école.'],
+  'You finished {skill}. Your progress stays on this device.': ['Terminaste {skill}. Tu progreso queda en este dispositivo.', 'आपने {skill} पूरा किया। आपकी प्रगति इसी डिवाइस पर रहती है।', 'أكملت {skill}. يبقى تقدمك على هذا الجهاز.', 'Vous avez terminé {skill}. Votre progression reste sur cet appareil.'],
+  'Sample saved on this device': ['Ejemplo guardado en este dispositivo', 'नमूना इस डिवाइस पर सहेजा गया', 'تم حفظ النموذج على هذا الجهاز', 'Exemple enregistré sur cet appareil'],
+  'Sample saved on this device. No request was sent and no reply will arrive.': ['Ejemplo guardado en este dispositivo. No se envió ninguna solicitud y no llegará una respuesta.', 'नमूना इस डिवाइस पर सहेजा गया। कोई अनुरोध नहीं भेजा गया और कोई जवाब नहीं आएगा।', 'تم حفظ النموذج على هذا الجهاز. لم يُرسل أي طلب ولن يصلك رد.', 'Exemple enregistré sur cet appareil. Aucune demande n’a été envoyée et aucune réponse n’arrivera.'],
+  'Sample form only. Use fictional details. Nothing is sent and no reply will arrive.': ['Formulario de ejemplo. Usa datos ficticios. No se envía nada y no llegará una respuesta.', 'केवल नमूना फ़ॉर्म। काल्पनिक जानकारी दें। कुछ नहीं भेजा जाता और कोई जवाब नहीं आएगा।', 'نموذج تجريبي فقط. استخدم بيانات وهمية. لا يُرسل شيء ولن يصلك رد.', 'Formulaire de démonstration. Utilisez des données fictives. Rien n’est envoyé et aucune réponse n’arrivera.'],
+  'Sample device request': ['Solicitud de dispositivo de ejemplo', 'डिवाइस अनुरोध का नमूना', 'طلب جهاز تجريبي', 'Exemple de demande d’appareil'],
+  'Save sample': ['Guardar ejemplo', 'नमूना सहेजें', 'حفظ النموذج', 'Enregistrer l’exemple'],
+  'Try sample request': ['Probar solicitud de ejemplo', 'नमूना अनुरोध आज़माएँ', 'تجربة نموذج الطلب', 'Essayer une demande fictive'],
+  'Sample email (not contacted)': ['Correo de ejemplo (sin contacto)', 'नमूना ईमेल (संपर्क नहीं होगा)', 'بريد تجريبي (لن نتواصل معه)', 'Adresse fictive (aucun contact)'],
+  'Try the sample helpdesk': ['Probar la ayuda de ejemplo', 'नमूना सहायता केंद्र आज़माएँ', 'تجربة مكتب المساعدة التجريبي', 'Essayer l’assistance de démonstration'],
+  'Bundled lessons and saved progress work offline. Sync is a simulation; no work is uploaded.': ['Las lecciones incluidas y el progreso guardado funcionan sin conexión. La sincronización es simulada; no se sube ningún trabajo.', 'शामिल पाठ और सहेजी गई प्रगति ऑफ़लाइन काम करते हैं। सिंक केवल डेमो है; कोई काम अपलोड नहीं होता।', 'تعمل الدروس المضمّنة والتقدم المحفوظ دون إنترنت. المزامنة محاكاة ولا يُرفع أي عمل.', 'Les leçons incluses et la progression enregistrée fonctionnent hors ligne. La synchronisation est simulée ; aucun travail n’est envoyé.'],
+}
+
+export const demoMessages = Object.fromEntries(['es', 'hi', 'ar', 'fr'].map((language, index) => [
+  language, Object.fromEntries(Object.entries(entries).map(([source, translations]) => [source, translations[index]])),
+]))

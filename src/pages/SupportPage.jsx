@@ -5,17 +5,17 @@ import { evidence } from '../data.js'
 import { useI18n } from '../i18n.jsx'
 
 const faqs = [
-  ['Can I use SyncED without internet?', 'Yes. Downloaded lessons, videos, worksheets, assignments, and saved progress work offline. A connection is only needed to download new content or send queued work.'],
-  ['How are assignment due dates enforced?', 'The device checks the due and closing times. Work after the due time is marked late; work after the closing time is locked. The school confirms the official status after sync.'],
-  ['Who can request a refurbished device?', 'A participating school, library, or community organization confirms eligibility through programs it already manages. SyncED does not ask families to upload income documents.'],
+  ['Can I use SyncED without internet?', 'Bundled lessons and saved progress work offline. Sync is a simulation; no work is uploaded.'],
+  ['How are assignment due dates enforced?', 'Deadlines are fixed in UTC and checked on this device. No school receives this demo work.'],
+  ['Who can request a refurbished device?', 'Sample form only. Use fictional details. Nothing is sent and no reply will arrive.'],
   ['Is SyncED a nonprofit?', 'SyncED is currently a proposed nonprofit education initiative and working prototype. It should not claim registered nonprofit status until that legal process is complete.'],
   ['Does SyncED sell student data?', 'No. The product model does not rely on ads or selling personal data. A production pilot would use written school agreements, limited data collection, encryption, access controls, and clear deletion rules.'],
 ]
 
-function HelpTab({ state, onSubmitHelp }) {
+function HelpTab({ onSubmitHelp }) {
   const { t } = useI18n()
   const [topic, setTopic] = useState('Lesson or assignment')
-  const [email, setEmail] = useState('')
+  const email = 'maya@example.com'
   const [message, setMessage] = useState('')
   const [openFaq, setOpenFaq] = useState(0)
   const [sent, setSent] = useState(false)
@@ -29,13 +29,13 @@ function HelpTab({ state, onSubmitHelp }) {
   return (
     <div className="support-grid">
       <section className="panel helpdesk-panel">
-        <div className="section-heading"><div><h2>{t('Ask the SyncED helpdesk')}</h2><p>{t('Send a question now. If you are offline, it waits securely on this device.')}</p></div><MessageCircleQuestion size={22} /></div>
-        {sent ? <div className="help-success"><span><Check size={24} /></span><h3>{t('Question saved')}</h3><p>{t('We will send an update to {email} after this device syncs.', { email })}</p><Button variant="secondary" onClick={() => { setSent(false); setMessage('') }}>{t('Ask another question')}</Button></div> : (
+        <div className="section-heading"><div><h2>{t('Try the sample helpdesk')}</h2><p>{t('Sample form only. Use fictional details. Nothing is sent and no reply will arrive.')}</p></div><MessageCircleQuestion size={22} /></div>
+        {sent ? <div className="help-success"><span><Check size={24} /></span><h3>{t('Sample saved on this device')}</h3><p>{t('Sample saved on this device. No request was sent and no reply will arrive.')}</p><Button variant="secondary" onClick={() => { setSent(false); setMessage('') }}>{t('Ask another question')}</Button></div> : (
           <form className="help-form" onSubmit={submit}>
-            <label>{t('What do you need help with?')}<select value={topic} onChange={(event) => setTopic(event.target.value)}><option>{t('Lesson or assignment')}</option><option>{t('Device or download')}</option><option>{t('Account or privacy')}</option><option>{t('Community hub')}</option></select></label>
-            <label>{t('Email for the reply')}<span className="input-with-icon"><Mail size={16} /><input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@example.com" /></span></label>
+            <label>{t('What do you need help with?')}<select value={topic} onChange={(event) => setTopic(event.target.value)}>{['Lesson or assignment', 'Device or download', 'Account or privacy', 'Community hub'].map((item) => <option key={item} value={item}>{t(item)}</option>)}</select></label>
+            <label>{t('Sample email (not contacted)')}<span className="input-with-icon"><Mail size={16} /><input type="email" readOnly value={email} placeholder="name@example.com" /></span></label>
             <label>{t('Your question')}<textarea required minLength="10" rows="6" value={message} onChange={(event) => setMessage(event.target.value)} placeholder={t('Tell us what happened and what you were trying to do…')} /></label>
-            <Button type="submit" icon={Send}>{t(state.queueItems.length ? 'Save question to sync queue' : 'Send question')}</Button>
+            <Button type="submit" icon={Send}>{t('Save sample')}</Button>
           </form>
         )}
       </section>
@@ -54,7 +54,7 @@ function AboutTab() {
 
       <section className="model-section"><div className="list-intro"><h2>{t('How the model would work')}</h2><span>{t('Pilot design')}</span></div><div className="model-grid">
         <article><span><School size={24} /></span><h3>{t('Partner-led access')}</h3><p>{t('Schools and community organizations identify eligible families through existing programs and referrals. The app avoids public income scoring and document uploads.')}</p></article>
-        <article><span><WifiOff size={24} /></span><h3>{t('Offline first')}</h3><p>{t('The same web app works on phones, tablets, Chromebooks, and computers. Content is cached locally, while a secure queue sends progress when a connection returns.')}</p></article>
+        <article><span><WifiOff size={24} /></span><h3>{t('Offline first')}</h3><p>{t('Bundled lessons and saved progress work offline. Sync is a simulation; no work is uploaded.')}</p></article>
         <article><span><Laptop size={24} /></span><h3>{t('Device agnostic')}</h3><p>{t('Responsive web standards, keyboard access, touch controls, reduced motion, themes, larger text, and multilingual content keep one product usable across devices.')}</p></article>
       </div></section>
     </div>

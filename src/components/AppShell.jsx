@@ -99,8 +99,8 @@ export default function AppShell({
           <button className={`side-card connection-card ${online ? 'is-online' : ''}`} onClick={() => setOnline(!online)}>
             <span className="side-status-icon">{online ? <Wifi size={19} /> : <CheckCircle2 size={19} />}</span>
             <span>
-              <strong>{online ? t('You’re online') : t('You’re offline')}</strong>
-              <small>{online ? t('Ready to sync') : t('All set to learn')}</small>
+              <strong>{online ? t('Demo connection on') : t('Demo connection off')}</strong>
+              <small>{online ? t('Simulate sync') : t('All set to learn')}</small>
             </span>
           </button>
           <button className="collapse-control" onClick={toggleCollapsed} aria-label={t(collapsed ? 'Expand sidebar' : 'Collapse sidebar')} title={t(collapsed ? 'Expand sidebar' : 'Collapse sidebar')}>
@@ -118,7 +118,7 @@ export default function AppShell({
           {plainLanguage ? <button className="plain-mode-chip" onClick={() => navigate('settings')}><CheckCircle2 size={15} />{t('Plain language is on')}</button> : null}
           <button className={`connection-control ${online ? 'online' : 'offline'}`} onClick={() => setOnline(!online)}>
             <span className="connection-symbol">{online ? <Wifi size={17} /> : <WifiOff size={17} />}</span>
-            <span>{online ? t('Connected') : t('Offline ready')}</span>
+            <span>{online ? t('Demo connection on') : t('Offline ready')}</span>
             <ChevronDown size={16} />
           </button>
           <label className="language-control">

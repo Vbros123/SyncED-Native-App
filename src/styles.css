@@ -2201,3 +2201,10 @@ body.launch-is-running { overflow: hidden; }
   .launch-student { opacity: 1; transform: none; }
   .lesson-complete-burst { display: none; }
 }
+.ai-tutor { margin-block: 20px; padding: 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+.ai-tutor h4 { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; }
+.ai-tutor p { margin-block: 10px; overflow-wrap: anywhere; line-height: 1.6; }
+.ai-tutor-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-block: 14px; }
+.ai-tutor details { flex: 1 1 180px; }
+.ai-tutor summary { cursor: pointer; }
+.ai-tutor small { display: block; }

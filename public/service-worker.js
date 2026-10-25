@@ -13,8 +13,20 @@ self.addEventListener('activate', (event) => {
   self.clients.claim()
 })
 
+// WebLLM manages its own model-weight storage via the Cache API and IndexedDB.
+// Model shards are hundreds of megabytes across many files — never let the
+// app shell cache intercept or duplicate them.
+function isModelWeightRequest(request) {
+  const url = new URL(request.url)
+  return (
+    url.hostname.endsWith('huggingface.co') ||
+    url.hostname.endsWith('githubusercontent.com')
+  )
+}
+
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return
+  if (isModelWeightRequest(event.request)) return
 
   if (event.request.mode === 'navigate') {
     event.respondWith(

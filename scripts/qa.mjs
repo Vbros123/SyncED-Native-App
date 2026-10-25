@@ -1,17 +1,30 @@
 import http from 'node:http'
 import { readFile, stat, mkdir } from 'node:fs/promises'
 import path from 'node:path'
+import os from 'node:os'
+import assert from 'node:assert/strict'
+import { checkAssignmentDrafts, checkSavedSubmissionAndSync, checkDeadlineTransitions, checkHelpSample } from './assignment-regression.mjs'
+import { checkAiFallback } from './ai-regression.mjs'
 import { chromium as playwrightChromium } from 'playwright-core'
 
-const chromiumTemp = `/tmp/synced-chromium-${process.pid}`
-await mkdir(chromiumTemp, { recursive: true })
-process.env.TMPDIR = chromiumTemp
-process.getuid = () => 1000
-process.getgid = () => 1000
-const { default: chromium } = await import('@sparticuz/chromium')
+// Use a native browser on Windows; the bundled serverless Chromium is Linux-only.
+let launchOptions = { headless: true }
+if (process.env.SYNCED_BROWSER_PATH) {
+  launchOptions.executablePath = process.env.SYNCED_BROWSER_PATH
+} else if (process.platform === 'win32') {
+  launchOptions.channel = 'msedge'
+} else if (process.platform === 'darwin') {
+  launchOptions.channel = 'chrome'
+} else {
+  const chromiumTemp = path.join(os.tmpdir(), `synced-chromium-${process.pid}`)
+  await mkdir(chromiumTemp, { recursive: true })
+  process.env.TMPDIR = chromiumTemp
+  const { default: chromium } = await import('@sparticuz/chromium')
+  launchOptions = { ...launchOptions, args: chromium.args, executablePath: await chromium.executablePath() }
+}
 
 const root = path.resolve('dist')
-const screenshotDir = '/tmp/synced-qa'
+const screenshotDir = path.join(os.tmpdir(), 'synced-qa')
 await mkdir(screenshotDir, { recursive: true })
 
 const mime = {
@@ -49,7 +62,7 @@ const results = {}
 let browser
 
 try {
-  browser = await playwrightChromium.launch({ args: chromium.args, executablePath: await chromium.executablePath(), headless: true })
+  browser = await playwrightChromium.launch(launchOptions)
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1, acceptDownloads: true })
   await context.addInitScript(() => {
     const nativeSetTimeout = window.setTimeout.bind(window)
@@ -71,6 +84,7 @@ try {
     window.addEventListener('synced:sound', (event) => window.__SYNCED_SOUND_EVENTS__.push(event.detail?.name))
   })
   const page = await context.newPage()
+  await page.clock.setFixedTime(new Date('2026-09-20T12:00:00Z'))
   page.on('console', (message) => { if (message.type() === 'error') errors.push(`console: ${message.text()}`) })
   page.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`))
 
@@ -121,14 +135,18 @@ try {
   results.desktopOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
   await page.screenshot({ path: `${screenshotDir}/home-desktop.png`, fullPage: true })
 
+  await checkAssignmentDrafts(page)
+  results.assignmentDraftsIsolated = true
   await page.getByRole('button', { name: 'Open assignment calendar' }).click()
   await page.getByRole('heading', { name: 'Assignment calendar' }).waitFor()
   results.calendarEvents = await page.locator('.calendar-event').count()
   await page.locator('.calendar-event').first().click()
   await page.getByLabel('Your response').fill('I subtracted the same number from both sides.')
   await page.getByRole('button', { name: 'Submit assignment' }).click()
-  await page.getByText('Assignment submitted and queued to sync. +15 points.', { exact: true }).waitFor()
+  await page.getByText('Saved on this device. +15 points. Not sent to school.', { exact: true }).waitFor()
   results.assignmentSubmitted = true
+  await checkSavedSubmissionAndSync(page)
+  results.savedSubmissionAndSync = true
 
   await page.locator('.side-nav').getByRole('button', { name: 'Explore', exact: true }).click()
   await page.getByRole('heading', { name: 'Explore lessons' }).waitFor()
@@ -150,7 +168,7 @@ try {
   if (results.correctAnswerSounds !== 1 || results.capsBeforeLessonCompletion !== 0) throw new Error('Correct answer feedback fired the wrong effects')
   await page.screenshot({ path: `${screenshotDir}/correct-answer-desktop.png`, fullPage: false })
   await page.getByRole('button', { name: 'Complete lesson', exact: true }).click()
-  await page.getByText('Lesson complete! +10 learning points. Progress is queued to sync.', { exact: true }).waitFor()
+  await page.getByText('Lesson complete! +10 learning points. Saved on this device.', { exact: true }).waitFor()
   const lessonQrModal = page.getByTestId('completion-qr-modal')
   await lessonQrModal.waitFor({ state: 'visible' })
   const lessonQrImage = lessonQrModal.locator('img')
@@ -240,12 +258,13 @@ try {
   await page.getByPlaceholder('Enter city, ZIP code, hub, or service').fill('48207')
   results.locationSearchMatches = await page.locator('.hub-result').count()
   await page.getByRole('button', { name: 'Device support', exact: true }).click()
-  await page.locator('.device-program').first().getByRole('button', { name: 'Request support', exact: true }).click()
-  await page.getByLabel('Email for request updates').fill('maya@example.com')
-  await page.getByRole('checkbox').check()
-  await page.getByRole('button', { name: 'Save request', exact: true }).click()
-  await page.getByRole('heading', { name: 'Request received' }).waitFor()
-  results.deviceEmail = await page.locator('.modal').getByText(/maya@example.com/).first().isVisible()
+  await page.locator('.device-program').first().getByRole('button', { name: 'Try sample request', exact: true }).click()
+  assert.equal(await page.getByLabel('Sample email (not contacted)').inputValue(), 'maya@example.com')
+  assert.equal(await page.getByLabel('Sample email (not contacted)').getAttribute('readonly'), '')
+  await page.getByRole('button', { name: 'Save sample', exact: true }).click()
+  await page.getByRole('heading', { name: 'Sample saved on this device' }).waitFor()
+  results.sampleDeviceRequest = await page.locator('.modal').getByText('Sample saved on this device. No request was sent and no reply will arrive.', { exact: true }).isVisible()
+  assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('synced-demo-state-v2')).queueItems.some((item) => item.id.startsWith('device-'))), false)
   await page.getByRole('button', { name: 'Done', exact: true }).click()
 
   await page.locator('.side-nav').getByRole('button', { name: 'Settings', exact: true }).click()
@@ -267,6 +286,8 @@ try {
 
   await page.locator('.side-nav').getByRole('button', { name: 'Help & about', exact: true }).click()
   await page.getByRole('heading', { name: 'Help & about' }).waitFor()
+  await checkHelpSample(page)
+  results.helpSampleLocalOnly = true
   await page.getByRole('button', { name: 'About & impact', exact: true }).click()
   results.evidenceCards = await page.locator('.evidence-grid article').count()
   results.sourceLinks = await page.locator('.evidence-grid a').count()
@@ -374,6 +395,10 @@ try {
     `${screenshotDir}/privacy-desktop.png`,
     `${screenshotDir}/home-mobile-es.png`,
   ]
+  await checkDeadlineTransitions(browser, baseUrl)
+  results.deadlineTransitions = true
+  await checkAiFallback(browser, baseUrl)
+  results.aiFallback = true
   results.baseUrl = baseUrl
   console.log(JSON.stringify(results, null, 2))
 } finally {
