@@ -40,7 +40,7 @@
     "eslint": "^10.7.0",
     "globals": "^17.7.0",
     "playwright-core": "^1.61.1",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.5"
   },
   "description": "Offline-first multilingual education app for web, iOS, and Android.",
   "engines": {
