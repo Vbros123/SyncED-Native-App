@@ -30,7 +30,7 @@
     "react-dom": "latest",
     "typescript": "*",
     "vite": "*",
-    "@mlc-ai/web-llm": "^0.2.84"
+    "@mlc-ai/web-llm": "^0.2.86"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
